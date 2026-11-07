@@ -10,7 +10,7 @@ base=sys.argv[1].rstrip("/")+"/"; files=sorted(os.path.basename(p) for p in glob
 def get(u):
     try: r=urllib.request.urlopen(urllib.request.Request(u,headers={"User-Agent":"Mozilla/5.0"}),timeout=20); return r.status
     except urllib.error.HTTPError as e: return e.code
-for f in files+["css/styles.css","js/main.js","robots.txt","sitemap.xml","site.webmanifest","favicon.ico","assets/logo.png","assets/og-image.png","assets/js/checkout-config.js","assets/statewatchpro-logo.svg"]:
+for f in files+["css/styles.css","js/main.js","robots.txt","sitemap.xml","site.webmanifest","favicon.ico","assets/logo.png","assets/og-image.png","assets/js/checkout-config.js","assets/js/report-config.js","assets/reports/statewatchpro-trends-sample.pdf","assets/statewatchpro-logo.svg"]:
     s=get(base+("" if f=="index.html" else f)); print(s,f)
     if s!=200: bad+=1
 banned=re.compile(r"verasail|scaled ?learning|agile ?&|agileand|\bkids?\b|child|testimonial|lorem|\d+%|password|onrender|hhs|medicaid|human[ -]services|health|sign in",re.I)
@@ -51,8 +51,31 @@ for needle, blob, name in [
     ("Can I get email digests and alerts?", faq, "faq-digests"),
     ("Can I customize my dashboard?", faq, "faq-dashboards"),
     ('"audienceType": "State government teams"', home, "jsonld"),
+    ("Free preview: latest State Government Trends Insights Report", home, "home-preview"),
+    ("Peer States", home, "home-peer"),
+    ('class="badge">New', home, "home-badge"),
+    ('class="badge">New', feat, "features-badge"),
+    ('id="peer"', feat, "feat-peer"),
+    ('id="quarterly"', feat, "feat-quarterly"),
+    ("Saved views and filters", home, "home-saved"),
 ]:
     if needle not in blob: print("MISSING", name, needle); bad+=1
+rep=open(f"{OUT}/reports.html").read()
+for needle, name in [
+    ("Free preview: latest State Government Trends Insights Report", "reports-cta"),
+    ('id="request-report"', "reports-form"),
+    ("Example data only", "reports-example"),
+    ("Vendor A", "reports-vendor"),
+    ('id="req-name"', "reports-name"),
+    ('id="req-org"', "reports-org"),
+    ('id="req-role"', "reports-role"),
+    ('id="req-type"', "reports-type"),
+    (">Government<", "reports-gov-option"),
+]:
+    if needle not in rep: print("MISSING", name, needle); bad+=1
+if "Free preview: latest State Government Trends Insights Report" not in pricing: print("MISSING pricing preview"); bad+=1
+if "statewatchpro-trends-sample.pdf" not in open(f"{OUT}/assets/js/report-config.js").read(): print("MISSING preview url"); bad+=1
+if not os.path.exists(f"{OUT}/assets/reports/statewatchpro-trends-sample.pdf"): print("MISSING pdf"); bad+=1
 if os.path.exists(os.path.join(OUT, "CNAME")): print("UNEXPECTED CNAME"); bad+=1
 if "servicers" in feat.lower() or "servicers" in home.lower(): print("TYPO servicers"); bad+=1
 os.makedirs(SHOTS,exist_ok=True)
@@ -87,6 +110,19 @@ with sync_playwright() as p:
         assert "amendments" in pg.inner_text(".cb-log") and "in-app" in pg.inner_text(".cb-log")
         pg.fill("#cb-in","can I customize my dashboard"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
         assert "widgets" in pg.inner_text(".cb-log")
+        pg.fill("#cb-in","what is the quarterly trends report"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
+        assert "Sample Edition" in pg.inner_text(".cb-log")
+        pg.fill("#cb-in","what are peer states"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
+        assert "model bills" in pg.inner_text(".cb-log")
+        pg.goto(base+"reports.html",wait_until="networkidle")
+        assert "statewatchpro-trends-sample.pdf" in pg.get_attribute("[data-report-preview]","href")
+        pg.fill("#req-name","Ada Example"); pg.fill("#req-org","Example Office"); pg.fill("#req-role","Analyst"); pg.select_option("#req-type","Government")
+        mail=pg.get_attribute("#req-mail","href")
+        assert mail.startswith("mailto:hello@statewatchpro.com") and "Ada%20Example" in mail and "Example%20Office" in mail and "Analyst" in mail and "Government" in mail
+        pg.route("**/report-config.js*", lambda r: r.fulfill(content_type="application/javascript", body="window.SWP_REPORT_PREVIEW_URL='';"))
+        pg.goto(base,wait_until="networkidle")
+        assert pg.get_attribute("[data-report-preview]","href").endswith("reports.html#request-report")
+        pg.unroute("**/report-config.js*")
         pg.screenshot(path=f"{SHOTS}/chatbot-open-{name}.png"); pg.keyboard.press("Escape"); assert not pg.is_visible("#cb-panel")
         for f in files: assert 'href="support.html"' in open(f"{OUT}/{f}").read(), f
         if m:
