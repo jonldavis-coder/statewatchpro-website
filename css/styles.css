@@ -44,4 +44,5 @@ img{max-width:100%;height:auto}a{color:var(--teal)}h1,h2,h3{line-height:1.2;colo
 .cb-chips{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:.35rem;padding:0 .8rem .6rem}.cb-chips button{flex:0 0 auto;white-space:nowrap;font:inherit;font-size:.78rem;border:1px solid var(--teal);color:var(--teal);background:#fff;border-radius:999px;padding:.3rem .6rem;cursor:pointer}
 .cb-form{display:flex;border-top:1px solid #e2e8f0}.cb-form input{flex:1;border:0;padding:.8rem;font:inherit;min-width:0}.cb-form button{border:0;background:var(--teal);color:#fff;padding:0 1rem;font:inherit;font-weight:600;cursor:pointer}
 @media(max-width:560px){.cb-panel{right:12px;bottom:84px}.cb-btn{right:12px;bottom:12px}}
+.filter-note{border:1px solid #cbd5e1;border-left:4px solid var(--cyan);border-radius:12px;padding:1.4rem;background:#fff}.filter-note b{color:var(--navy)}.filter-note p{margin:.4rem 0 0}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
