@@ -58,6 +58,9 @@ for needle, blob, name in [
     ('id="peer"', feat, "feat-peer"),
     ('id="quarterly"', feat, "feat-quarterly"),
     ("Saved views and filters", home, "home-saved"),
+    ('id="for-agencies"', home, "agency-band"),
+    ("See what other states are doing", home, "agency-headline"),
+    ("Talk with the team", home, "agency-talk"),
 ]:
     if needle not in blob: print("MISSING", name, needle); bad+=1
 rep=open(f"{OUT}/reports.html").read()

@@ -65,6 +65,13 @@ img{max-width:100%;height:auto}a{color:var(--teal)}h1,h2,h3{line-height:1.2;colo
 .preview-band h2,.preview-band h3{color:#fff;margin:.35rem 0 .5rem}
 .preview-band p{margin:.2rem 0 .5rem}
 .preview-band .btn-ghost{border-color:var(--cyan);color:#e0faff}
+.sec.follow{padding-top:1.25rem}
+.agency-band h2{font-size:clamp(1.7rem,3.2vw,2.4rem);max-width:22ch}
+.agency-points{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.25rem 0 0}
+.agency-points article{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:1.05rem 1.15rem;border-top:4px solid var(--cyan)}
+.agency-points h3{font-size:1.02rem;margin:0 0 .35rem}
+.agency-points p{margin:0;color:var(--mut)}
+@media(max-width:700px){.agency-points{grid-template-columns:1fr}}
 .mock .exlabel{color:#5eead4;font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:0 0 .7rem}
 .req{display:grid;gap:.75rem;max-width:520px}
 .req label{display:grid;gap:.25rem;font-weight:600;color:var(--navy)}

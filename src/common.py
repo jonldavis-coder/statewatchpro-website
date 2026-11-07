@@ -3,7 +3,7 @@ import json
 SITE = "StateWatchPro"
 import os
 BASE = os.environ.get("SWP_BASE", "https://jonldavis-coder.github.io/statewatchpro-website")  # set SWP_BASE=https://statewatchpro.com for domain build
-V = "20261107d"
+V = "20261107e"
 EMAIL_USER, EMAIL_DOMAIN = "hello", "statewatchpro.com"  # PLACEHOLDER — Jonathan to confirm
 APP = "https://rfp-intelligence-hub-3ht5.onrender.com"
 NAV = [("index.html","Home"),("features.html","Features"),("reports.html","Reports"),("coverage.html","Coverage"),("use-cases.html","Use cases"),("provenance.html","Data &amp; provenance"),("pricing.html","Pricing"),("faq.html","FAQ"),("support.html","Support")]
