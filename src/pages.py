@@ -1,10 +1,15 @@
 from common import *
 P = {}
+AUD = [
+ {"@type":"Audience","audienceType":"Consultants"},
+ {"@type":"Audience","audienceType":"Consulting firms"},
+ {"@type":"Audience","audienceType":"Vendors"},
+ {"@type":"Audience","audienceType":"State government teams"},
+]
 SOFT = {"@context":"https://schema.org","@type":"SoftwareApplication","name":"StateWatchPro","applicationCategory":"BusinessApplication","operatingSystem":"Web",
  "description":"State government intelligence for consultants, consulting firms, vendors, and state government teams: RFPs out for bid, contract awards, bidders and winners, price benchmarks, legislation, policy manual and agency rule changes across U.S. states.",
- "url":BASE+"/","image":BASE+"/assets/og-image.png",
- "audience":[{"@type":"Audience","audienceType":"Consultants"},{"@type":"Audience","audienceType":"Consulting firms"},{"@type":"Audience","audienceType":"Vendors"},{"@type":"Audience","audienceType":"State government teams"}],
- "offers":[{"@type":"Offer","name":"30-day trial","price":"399","priceCurrency":"USD","description":"30-day trial for 1 user covering every currently covered state; credited toward an annual plan bought within 30 days"},{"@type":"Offer","name":"Per user","price":"3000","priceCurrency":"USD","description":"Annual access for an individual user, billed annually"},{"@type":"Offer","name":"5-user bundle","price":"10000","priceCurrency":"USD","description":"Annual access for up to 5 users, billed annually"},{"@type":"Offer","name":"10-user bundle","price":"25000","priceCurrency":"USD","description":"Annual access for up to 10 users, billed annually"},{"@type":"Offer","name":"Enterprise","price":"35000","priceCurrency":"USD","description":"Enterprise license for up to 30 users, billed annually"}]}
+ "audience":AUD,
+ "url":BASE+"/","image":BASE+"/assets/og-image.png","offers":[{"@type":"Offer","name":"30-day trial","price":"399","priceCurrency":"USD","description":"30-day trial for 1 user covering every currently covered state; credited toward an annual plan bought within 30 days"},{"@type":"Offer","name":"Per user","price":"3000","priceCurrency":"USD","description":"Annual access for an individual user, billed annually"},{"@type":"Offer","name":"5-user bundle","price":"10000","priceCurrency":"USD","description":"Annual access for up to 5 users, billed annually"},{"@type":"Offer","name":"10-user bundle","price":"25000","priceCurrency":"USD","description":"Annual access for up to 10 users, billed annually"},{"@type":"Offer","name":"Enterprise","price":"35000","priceCurrency":"USD","description":"Enterprise license for up to 30 users, billed annually"}]}
 
 DASH = '''<div class="mock" role="img" aria-label="Illustration of a StateWatchPro dashboard with out-for-bid, awards and watch-list panels (illustrative, not real data)">
 <div class="mbar"><i></i><i></i><i></i><span>Executive dashboard · illustrative</span></div>
@@ -15,11 +20,11 @@ DASH = '''<div class="mock" role="img" aria-label="Illustration of a StateWatchP
 <div class="mp"><b>Source provenance</b><div class="ln w55"></div><div class="ln w70"></div></div></div></div>'''
 
 FEAT = [
- ("AI cross-state search","Ask in plain language across every state you follow. The AI flags recurring pain points and good ideas that carry over from one state to another, with links back to the source documents.","ai-search"),
- ("Executive dashboards &amp; trends","One view of what's out for bid, what was just awarded, and how activity is trending, built for leaders who need the picture in minutes.","dashboards"),
- ("Competitive landscape","Vendor capabilities, who appears to have the edge in a program area, and the differentiators that showed up in past bids and awards.","competitive"),
- ("Bidder league table","See who bid and who won across solicitations, ranked so you can spot frequent competitors and likely teaming partners.","league"),
- ("Insights","A running page of what's out for bid now and the emerging requirements showing up in new solicitations.","insights"),
+ ("AI cross-state search","Ask in plain language across every state you follow. The AI flags recurring pain points and good ideas that carry over from one state to another, with links back to the source documents. State staff use it to compare what other states are doing.","ai-search"),
+ ("Executive dashboards &amp; trends","One view of what's out for bid, what was just awarded, and how activity is trending, built for leaders who need the picture in minutes. State staff use it to follow trends across states.","dashboards"),
+ ("Competitive landscape","Vendor capabilities, who appears to have the edge in a program area, and the differentiators that showed up in past bids and awards. State staff use it to compare how similar work shows up in other states.","competitive"),
+ ("Bidder league table","See who bid and who won across solicitations, ranked so you can spot frequent competitors and likely teaming partners. State staff use it to see who has done similar work in other states.","league"),
+ ("Insights","A running page of what's out for bid now, the emerging requirements in new solicitations, and what states pay. State staff use the price view as cost reporting on scope and price.","insights"),
  ("Proposal reference library","Past solicitations, amendments, Q&amp;A, and award documents organized for reuse when you write your next response.","library"),
  ("Standard executive reports","Repeatable reports for pipeline reviews and leadership briefings, so the same questions don't need to be rebuilt each week.","reports"),
  ("Collection status &amp; error logs","See when each source was last collected, what changed, and any collection errors, so you know how fresh your view is.","status"),
@@ -27,31 +32,29 @@ FEAT = [
  ("Source provenance on everything","Every record links back to where it came from, with the collection date, so findings can be checked before they go into a bid decision.","provenance"),
 ]
 WATCH = [("RFPs &amp; solicitations","Opportunities out for bid, with amendments and deadlines."),("Contract awards","What was awarded, to whom, and when."),("Who bid, who won","Bidder lists and outcomes where states publish them."),
- ("Price benchmarks","What states have paid for comparable work."),("Legislation","Bills that can create, fund, or reshape programs."),("Program &amp; policy manuals","Manual and policy changes that shift requirements."),
+ ("Price benchmarks","What states have paid for comparable work, and how that work was scoped. State staff can use this as cost reporting."),("Legislation","Bills that can create, fund, or reshape programs."),("Program &amp; policy manuals","Manual and policy changes that shift requirements."),
  ("Rule changes","Administrative rules as they're proposed and adopted."),("News","State-level coverage that gives context to the documents.")]
 
-AUDIENCE = sec("Who it's for", cards([
- ("Consultants &amp; consulting firms","Find pursuits, prepare proposals, and bring a cross-state view to the work you do with states. <a href=\"use-cases.html#pursue\">For bid pursuers &rarr;</a>"),
- ("Vendors","See who is bidding and winning, what states pay, and what is changing on contracts you hold. <a href=\"use-cases.html#hold\">For contract holders &rarr;</a>"),
- ("For state government teams","Compare what other states are doing, follow trends across states, and use cost reporting to see what other states pay and how contracts are scoped. Insights are there to reuse and adapt in your own programs. <a href=\"use-cases.html#government\">State government use cases &rarr;</a>"),
-]), "Consultants, consulting firms, vendors, and the state government teams who want a sourced view of other states.", id_="audiences")
-HIGHLIGHT = sec("Digests, alerts, and your own dashboard", cards([
- ("Email digests and notifications","A digest of each saved search, and an email when a new opportunity matches, brings those matches to you. <a href=\"features.html#digests\">Email digests &rarr;</a>"),
- ("Alerts","Configurable alerts for new RFPs, amendments, deadlines, awards, renewals, and price or cost changes, delivered in-app and by email. <a href=\"features.html#alerts\">Alerts &rarr;</a>"),
- ("Customizable dashboards","Arrange widgets for your states, categories, pipeline, deadlines, trends, and cost comparisons, and save that view for yourself or your team. <a href=\"features.html#custom-dashboards\">Customizable dashboards &rarr;</a>"),
-], "grid3"), "Hear about new opportunities and changes, and arrange the screen around the states and costs you follow.", id_="stay-current")
 P["index.html"] = ("StateWatchPro | State Government RFP &amp; Contract Intelligence",
  "StateWatchPro watches state governments for RFPs out for bid, contract awards, who bid and won, price benchmarks, legislation, policy manual and agency rule changes. For consultants, consulting firms, vendors, and state government teams.",
  f'''<section class="hero"><div class="wrap hgrid"><div><span class="eb">State government intelligence for consultants, firms, vendors &amp; state teams</span>
 <h1>Win new state contracts. Protect the ones you hold.</h1>
 <p class="lead">StateWatchPro tracks RFPs out for bid, contract awards, who bid and who won, what states pay, legislation, program and policy manual changes, rule changes, and news, with the source behind every record. One place for procurement and policy across all 50 states.</p>
 <div class="acts">{DEMO()}{EARLY("btn btn-ghost light")}</div><p class="note">Arkansas comes first; the rest of the states follow in batches.</p></div><figure class="shot hero-shot"><img src="assets/screens/executive-dashboard.webp" alt="StateWatchPro executive dashboard, illustrative product view with example data" width="1600" height="900" fetchpriority="high"><figcaption>Illustrative product view with example data</figcaption></figure></div></section>
-{AUDIENCE}
 {sec("Two ways to win in state government", '<div class="grid2"><article class="card"><h3>Pursuing new bids</h3><p>Find opportunities early, size up competitors, and use price benchmarks to set pricing.</p><p><a href="use-cases.html#pursue">For bid pursuers &rarr;</a></p></article><article class="card"><h3>Already holding contracts</h3><p>Protect and grow what you have: watch agency rule, legislation, program and policy manual changes that affect your contracts, renewal and rebid timing, competitor moves, and expansion ideas from other states.</p><p><a href="use-cases.html#hold">For contract holders &rarr;</a></p></article></div>', "Built for consultants, consulting firms, and vendors who sell services to state governments.")}
+{sec("Who it\u2019s for", cards([
+ ("Consultants and consulting firms","Find state opportunities early, see who else is bidding, and bring cross-state context into the pursuits you lead. <a href=\"use-cases.html#pursue\">For bid pursuers &rarr;</a>"),
+ ("Vendors","Pursue new state contracts and keep watch on the ones you hold: policy changes, rebid timing, and competitor moves. <a href=\"use-cases.html#hold\">For contract holders &rarr;</a>"),
+ ("For state government teams","Compare what other states are doing, follow trends across states, and use cost reporting (what other states pay and how contracts are scoped) to reuse and adapt approaches that fit your state. <a href=\"use-cases.html#government\">State government use cases &rarr;</a>","for-government"),
+ ]), "StateWatchPro serves the teams who sell to state governments, and the state government teams who need a clear view of their peers.", id_="audiences")}
 {sec("The problem", checks(["State procurement is spread across 50 different portals, so it’s easy to miss when an RFP is posted, amended, or awarded.","Changes to laws, rules, program and policy manuals in each state are hard to track, and they can change the contracts you already hold.","There’s no single view of who bids, who wins, what states pay, and what new requirements are showing up.","Pain points and good ideas in one state often show up later in others, but nobody connects them."]), dark=True)}
 {sec("What StateWatchPro watches", cards(WATCH,"grid4"), "One place for the signals that shape state contracting, instead of dozens of procurement portals, agency sites, and legislative trackers.")}
 {sec("Built for the way bid and account teams work", cards([(a,b) for a,b,_ in FEAT[:6]]) + '<p class="more"><a href="features.html">See what each feature does and why it matters &rarr;</a></p>', dark=True)}
-{HIGHLIGHT}
+{sec("Digests, alerts, and your own dashboard", cards([
+ ("Email digests and notifications","A digest of each saved search, and an email when a new opportunity matches, brings those matches to you. <a href=\"features.html#digests\">Email digests &rarr;</a>"),
+ ("Alerts","Configurable alerts for new RFPs, amendments, deadlines, awards, renewals, and price or cost changes, delivered in-app and by email. <a href=\"features.html#alerts\">Alerts &rarr;</a>"),
+ ("Customizable dashboards","Arrange widgets for your states, categories, pipeline, deadlines, trends, and cost comparisons, and save that view for yourself or your team. <a href=\"features.html#custom-dashboards\">Customizable dashboards &rarr;</a>"),
+], "grid3"), "Hear about new opportunities and changes, and arrange the screen around the states and costs you follow.", id_="stay-current")}
 {sec("From signal to decision", '<ol class="steps"><li><b>Collect</b><span>Public state sources are gathered on a schedule, with status and error logs.</span></li><li><b>Organize</b><span>Records are tagged by state, agency, program area, and type.</span></li><li><b>Analyze</b><span>AI search and dashboards surface patterns, competitors, and requirements.</span></li><li><b>Act</b><span>Use reports and the reference library to make bid/no-bid calls and write stronger responses.</span></li></ol><p class="more"><a href="coverage.html">How it works &amp; coverage &rarr;</a></p>')}
 {sec("Trust what you read", checks(["Source link and collection date on every record","Per-state collection status, activity and error logs you can see","Polite collection that follows each site’s robots.txt rules and backs off when asked","No black-box numbers: price benchmarks trace to the documents they came from"]) + '<p class="more"><a href="provenance.html">Data &amp; provenance &rarr;</a></p>')}
 {cta()}''', SOFT)
@@ -74,9 +77,8 @@ P["coverage.html"] = ("How It Works &amp; State Coverage | StateWatchPro",
  + cta("Which states should come next?","Tell us your territory and the contracts you hold. Early-access members help shape the coverage order."))
 
 P["use-cases.html"] = ("Use Cases for Consultants, Firms, Vendors &amp; State Teams | StateWatchPro",
- "How consultants, consulting firms, vendors, and state government teams use StateWatchPro to win new state contracts, protect contracts they hold, and compare what other states are doing.",
- hero("Use cases","For consultants, consulting firms, vendors, and state government teams","Whether you’re chasing your next state contract, protecting the ones you already hold, or comparing what other states are doing, StateWatchPro shows you what’s changing and who’s moving.",
-  '<p class="acts"><a class="btn btn-ghost light" href="#pursue">Pursuing bids</a><a class="btn btn-ghost light" href="#hold">Holding contracts</a><a class="btn btn-ghost light" href="#government">State government teams</a></p>')
+ "How consultants, consulting firms, vendors, and state government teams use StateWatchPro to compare states, follow trends, review what states pay, win new contracts, and protect contracts they hold.",
+ hero("Use cases","For consultants, firms, vendors, and state government teams","Whether you’re chasing a state contract, protecting one you hold, or working in state government, StateWatchPro shows what’s changing across states and what it costs.")
  + sec("Pursuing new bids", cards([("Find opportunities early","Track RFPs and solicitations across the states you target, including amendments and deadlines, so you see them while there’s still time to prepare."),
   ("Size up competitors","Review who bid and who won by service category, compare vendor capabilities, and see who appears to have the edge."),
   ("Set pricing with benchmarks","Use price benchmarks drawn from state documents to understand what states have paid for similar work."),
@@ -84,15 +86,17 @@ P["use-cases.html"] = ("Use Cases for Consultants, Firms, Vendors &amp; State Te
  + sec("Already holding contracts", cards([("Watch changes that affect your contracts","Track agency rule, legislation, program and policy manual changes in the states where you deliver, before they surprise your team."),
   ("Plan for renewal and rebid","Keep an eye on renewal and rebid timing so you can prepare well before the next solicitation."),
   ("Track competitor moves","See which vendors are bidding and winning in your service areas, and where they’re expanding."),
-  ("Find expansion ideas","Spot programs and good ideas in other states that match what you already deliver, and bring them to new states.")],"grid2"), "For incumbents who want to protect and grow their state contracts.", dark=True, id_="hold")
+  ("Find expansion ideas","Spot programs and good ideas in other states that match what you already deliver, and bring them to new states.")],"grid2"), "For incumbents who want to protect and grow their state contracts.", id_="hold")
  + sec("For state government teams", cards([
-  ("Compare what other states are doing","Look across states at open solicitations, awards, requirements, and how similar work is scoped. Filter to the states that matter to your program and read them side by side."),
-  ("Follow trends across states","See how solicitation activity, awards, and policy changes move over time, so a pattern in one state is easier to notice in others."),
-  ("Use cost reporting","See what other states pay for comparable work and how those contracts are scoped. Each figure ties back to the public document it came from."),
-  ("Reuse and adapt insights","Pick up approaches from other states and adapt them to your own programs. Your team decides what fits.")],"grid2"), "For state employees who want a clear, sourced view of other states: what they are doing, how the work is trending, and what it costs.", id_="government")
- + sec("Who uses it", cards([("Capture &amp; business development","Find and qualify the right pursuits."),("Proposal writers","See RFPs and responses from other states."),("Executives","Decide which bids to pursue and understand who wins and why."),("Account &amp; delivery leads","Stay ahead of policy changes and rebids on contracts you hold."),("Pricing analysts","Ground pricing in what states have paid."),("State government staff","Compare other states, follow trends, and review what comparable work costs and how it is scoped."),("Consulting partners","Bring cross-state insight to state clients.")]), dark=True)
- + sec("Questions it helps answer", checks(["What’s out for bid in my states right now?","Who has won this kind of work before, and against whom?","What did the state pay last time?","Which rule, law, or manual changes affect the contracts we hold?","When is our contract up for renewal or rebid, and who might challenge us?","Which ideas from other states could expand our work?","What are other states doing on this kind of work, and what did they pay?","Which changes in other states should our team watch?"]))
- + cta())
+  ("Compare what other states are doing","Read solicitations, awards, legislation, and policy changes from other states side by side. Every record links back to its public source."),
+  ("Follow trends across states","See how bidding, awards, and policy activity move across the states you select, instead of checking one portal at a time."),
+  ("Cost reporting","See what other states pay and how contracts are scoped. Price benchmarks trace back to the documents they came from."),
+  ("Insights you can reuse and adapt","Take approaches that show up in other states and adapt them to your own solicitations, policies, and programs."),
+ ],"grid2"), "For state government employees who want a practical view of peer states.", dark=True, id_="government")
+ + sec("Who uses it", cards([("Capture &amp; business development","Find and qualify the right pursuits."),("Proposal writers","See RFPs and responses from other states."),("Executives","Decide which bids to pursue and understand who wins and why."),("Account &amp; delivery leads","Stay ahead of policy changes and rebids on contracts you hold."),("Pricing analysts","Ground pricing in what states have paid."),("Consulting partners","Bring cross-state insight to state clients."),("State government teams","Compare peer states, follow cross-state trends, and review what others pay and how work is scoped before you draft a solicitation or update a policy.")]))
+ + sec("Questions it helps answer", checks(["What’s out for bid in my states right now?","Who has won this kind of work before, and against whom?","What did the state pay last time?","Which rule, law, or manual changes affect the contracts we hold?","When is our contract up for renewal or rebid, and who might challenge us?","Which ideas from other states could expand our work?","What are other states paying for comparable work, and how is it scoped?","Which approaches from other states could we adapt?"]), dark=True)
+ + cta(),
+ {"@context":"https://schema.org","@type":"WebPage","name":"StateWatchPro use cases","url":BASE+"/use-cases.html","audience":AUD})
 
 P["provenance.html"] = ("Data Sources &amp; Provenance | StateWatchPro",
  "Every StateWatchPro record links back to its public source with a collection date. See collection status and error logs, and how AI findings are tied to documents.",
@@ -110,32 +114,32 @@ P["pricing.html"] = ("Pricing | StateWatchPro",
   "Customizable dashboards: arrange widgets for your states, categories, pipeline, deadlines, trends, and cost comparisons, and save a view for yourself or your team",
   "The same product features on the $399 30-day trial, for 1 user and every state currently covered",
  ]), "Digests, alerts, and customizable dashboards are part of every plan, alongside AI search, trends, cost comparisons, and the rest of StateWatchPro.", id_="included")
- + sec("State government teams", '<p>State government teams can contact sales about agency licensing. Tell us how many people need access and which states you want to follow.</p>' + mailto("StateWatchPro agency licensing","Contact sales about agency licensing"), "Agency licensing sits alongside the plans above, including the $399 30-day trial.", id_="agency")
- + sec("What to tell us", checks(["Which states you bid in, follow, or plan to","How many users need access (to pick the right plan)","Which features matter most (for example AI search, alerts, dashboards, reports)","Whether you are a consultant, a vendor, or a state government team","Whether you want to join early access while coverage expands"]))
+ + sec("State government teams", '<p>State government teams can contact sales to ask about agency licensing. The trial price and the annual prices above are unchanged.</p><div class="acts">'+mailto("StateWatchPro agency licensing","Contact sales")+'</div>', id_="agency")
+ + sec("What to tell us", checks(["Which states you bid in, follow, or plan to","How many users need access (to pick the right plan)","Which features matter most (for example AI search, alerts, dashboards, reports)","Whether you want to join early access while coverage expands","Whether you work in state government and want to ask about agency licensing"]))
  + cta("Questions about plans?","Email us and we’ll help you pick the right plan."), SOFT)
 
 FAQ = [("What is StateWatchPro?","State government intelligence for consultants, consulting firms, vendors, and state government teams. It watches state RFPs and solicitations, contract awards, bidders and winners, price benchmarks, legislation, program and policy manual changes, rule changes, and news."),
  ("Which states are covered?","Arkansas comes first and is being collected now. Bid portals for all 50 states plus DC are connected and news covers every state; the remaining states are backfilled in batches of five, followed by daily monitoring and change alerts."),
- ("Who is it for?","Consultants, consulting firms, and vendors that sell services to state governments, both those pursuing new bids and those protecting and growing contracts they already hold. State government employees use it too, to compare other states, follow trends, and review what other states pay and how contracts are scoped."),
- ("Can state government employees use StateWatchPro?","Yes. State staff use it to compare what other states are doing, follow trends across states, see what other states pay and how contracts are scoped, and reuse insights they can adapt to their own programs. StateWatchPro is an independent product built from public information."),
- ("Do you offer agency licensing for a state government team?","Yes. Contact sales and tell us how many people need access and which states you want to follow. The published plans, including the $399 30-day trial, remain available."),
+ ("Who is it for?","Consultants, consulting firms, and vendors that sell services to state governments, both those pursuing new bids and those protecting and growing contracts they already hold. State government employees use it as well, to compare other states, follow trends, and review what peers pay and how work is scoped."),
+ ("Can state government employees use StateWatchPro?","Yes. State government teams use it to compare what other states are doing, follow trends across states, see what other states pay and how contracts are scoped, and reuse insights they can adapt. Contact sales to ask about agency licensing."),
+ ("Is agency licensing different from the listed prices?","Email sales to ask about agency licensing for a government team. The $399 trial and the annual plans stay as published. StateWatchPro is an independent product."),
  ("Does it help if we already hold a state contract?","Yes. Watch agency rule, legislation, program and policy manual changes that affect your contracts, track renewal and rebid timing and competitor moves, and find expansion ideas from other states."),
  ("Where does the data come from?","Publicly available state government sources. Every record keeps a link to its source and the date it was collected."),
  ("How does the AI search work?","You ask questions in plain language across the states you follow. It flags pain points and ideas that carry over between states and links to the documents behind each finding."),
  ("Can I filter to just my states?","Yes. Every view can be filtered to one state or any combination of states."),
  ("How do I know the data is current?","Collection status and error logs show when each source was last collected and whether anything failed."),
- ("How much does it cost?","A 30-day trial is $399 for 1 user and covers every state currently in StateWatchPro; it is credited toward an annual plan bought within 30 days. Annual plans are $3,000 per user per year, $10,000 per year for a 5-user bundle, $25,000 per year for a 10-user bundle, or $35,000 per year for an Enterprise license with up to 30 users. State government teams can contact sales about agency licensing."),
+ ("How much does it cost?","A 30-day trial is $399 for 1 user and covers every state currently in StateWatchPro; it is credited toward an annual plan bought within 30 days. Annual plans are $3,000 per user per year, $10,000 per year for a 5-user bundle, $25,000 per year for a 10-user bundle, or $35,000 per year for an Enterprise license with up to 30 users. Email digests, alerts, and customizable dashboards are included on every plan."),
  ("Can I get email digests and alerts?","Yes. Saved searches can send an email digest, and you can get an email when a new opportunity matches. Alerts are configurable for new RFPs, amendments, deadlines, awards, renewals, and price or cost changes, and they are delivered in-app and by email."),
  ("Can I customize my dashboard?","Yes. Arrange widgets for your states, categories, pipeline, deadlines, trends, and cost comparisons, and save that view for yourself or your team."),
  ("How do I get access?","Request a demo or join the early-access list by email.")]
-P["faq.html"] = ("FAQ | StateWatchPro","Answers about StateWatchPro: state government teams, coverage, data sources, alerts, email digests, customizable dashboards, pricing and access.",
- hero("FAQ","Frequently asked questions","Quick answers about who it’s for, coverage, alerts, dashboards, and access.")
+P["faq.html"] = ("FAQ | StateWatchPro","Answers about StateWatchPro for consultants, firms, vendors, and state government teams: coverage, alerts, email digests, dashboards, pricing, agency licensing, and access.",
+ hero("FAQ","Frequently asked questions","Quick answers about coverage, data, and access.")
  + '<section class="sec"><div class="wrap faq">' + "".join(f"<details><summary>{q}</summary><p>{a}</p></details>" for q,a in FAQ) + '</div></section>' + cta(),
- {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":q,"acceptedAnswer":{"@type":"Answer","text":a}} for q,a in FAQ]})
+ {"@context":"https://schema.org","@type":"FAQPage","audience":AUD,"mainEntity":[{"@type":"Question","name":q,"acceptedAnswer":{"@type":"Answer","text":a}} for q,a in FAQ]})
 
-P["contact.html"] = ("Request a Demo | StateWatchPro","Request a StateWatchPro demo or join the early-access list. Tell us which states you bid in.",
- hero("Contact","Request a demo or join early access","Email us with the states you bid in and what you'd like to see. We'll follow up to set up a walkthrough.", f'<div class="acts">{DEMO()}{EARLY("btn btn-ghost light")}</div><p class="note">Email: <a href="mailto:{EMAIL_USER}@{EMAIL_DOMAIN}">{EMAIL_USER}@{EMAIL_DOMAIN}</a></p>')
- + sec("Helpful to include", checks(["Whether you’re pursuing new bids, holding state contracts, working in state government, or a mix of these","The states you bid in, follow, or are targeting","The program areas you pursue or administer","Whether you'd like early access as new states come online"])))
+P["contact.html"] = ("Request a Demo | StateWatchPro","Request a StateWatchPro demo or join the early-access list. Consultants, vendors, and state government teams can tell us which states they care about.",
+ hero("Contact","Request a demo or join early access","Email us with the states you care about and what you'd like to see. We'll follow up to set up a walkthrough.", f'<div class="acts">{DEMO()}{EARLY("btn btn-ghost light")}</div><p class="note">Email: <a href="mailto:{EMAIL_USER}@{EMAIL_DOMAIN}">{EMAIL_USER}@{EMAIL_DOMAIN}</a></p>')
+ + sec("Helpful to include", checks(["Whether you’re pursuing new bids, holding state contracts, working in state government, or a mix of these","The states you bid in, deliver in, or want to compare","The program areas you pursue or administer","Whether you'd like early access as new states come online","If you work in state government, whether you want to ask about agency licensing"])))
 
 LEGAL = '<div class="flag" role="note"><b>Draft: pending legal review.</b> This text has not yet been reviewed by counsel.</div>'
 P["privacy.html"] = ("Privacy Policy | StateWatchPro","How StateWatchPro handles information on this website.",
@@ -159,25 +163,25 @@ P["404.html"] = ("Page Not Found | StateWatchPro","The page you're looking for i
 CAP = "Illustrative product view with example data"
 FV = [
  ("ai-search","AI cross-state search","ai-cross-state-search",
-  "Search every state you follow in plain language. The AI groups results into patterns, flags recurring pain points, and highlights good ideas from one state that could carry over to another, each linked to its source.",
-  "Pain points and good ideas in one state often show up later in others, but nobody connects them. Reading 50 portals by hand doesn't scale.",
-  "Earlier insight into where a state is heading, and proposal themes grounded in what has already worked elsewhere, plus expansion ideas for the contracts you hold."),
+  "Search every state you follow in plain language. The AI groups results into patterns, flags recurring pain points, and highlights good ideas from one state that could carry over to another, each linked to its source. For state staff, it is a way to compare what other states are doing, with each finding linked to the source.",
+  "Pain points and good ideas in one state often show up later in others, but nobody connects them. Reading 50 portals by hand doesn't scale. State staff run into the same problem when they need a peer comparison.",
+  "Earlier insight into where a state is heading, and proposal themes grounded in what has already worked elsewhere, plus expansion ideas for the contracts you hold. State staff leave with comparisons they can adapt."),
  ("dashboards","Executive dashboards &amp; trends","executive-dashboard",
-  "A single view of your pipeline: what's out for bid, upcoming deadlines, recent awards, and how solicitation activity and policy changes are trending over time. State staff use the same trend view to follow how activity moves across states.",
-  "Leaders deciding which bids to pursue, which contracts need attention, or which peer states to watch, need the picture quickly, without waiting for someone to assemble it from many sources.",
-  "Faster, better-informed bid/no-bid decisions, early warning on contracts you hold, and a trend line state staff can follow across states.", "trends"),
+  "A single view of your pipeline: what's out for bid, upcoming deadlines, recent awards, and how solicitation activity and policy changes are trending over time. For state staff, the same view is how you follow trends across states.",
+  "Leaders deciding which bids to pursue, and which contracts need attention, need the picture quickly, without waiting for someone to assemble it from many sources. State staff need that same picture when they are watching peer states.",
+  "Faster, better-informed bid/no-bid decisions, and early warning on contracts you hold. State staff can see which way activity is moving before they rewrite a solicitation.", "trends"),
  ("competitive","Competitive landscape","competitive-landscape",
-  "Compare vendor capabilities side by side, see who appears to have the edge in a service area, and review the differentiators that show up in bids and evaluations.",
-  "Knowing who you're up against, and why they win, is central to new pursuits and to defending incumbent contracts at rebid.",
-  "A sharper win strategy, and stronger positioning when your own contracts come up for rebid."),
+  "Compare vendor capabilities side by side, see who appears to have the edge in a service area, and review the differentiators that show up in bids and evaluations. For state staff, the comparison shows how similar work is scoped and which approaches show up in other states.",
+  "Knowing who you're up against, and why they win, is central to new pursuits and to defending incumbent contracts at rebid. For state staff, the same comparison is a way to see how other states have structured the work.",
+  "A sharper win strategy, and stronger positioning when your own contracts come up for rebid. State staff can borrow scope and evaluation patterns that already appear elsewhere."),
  ("league","Bidder league table","bidder-league-table",
-  "Bidder and winner reports by service category and state: who bid, who won, and how outcomes compare across states, including where competitors are moving.",
-  "There's no single view of who bids and who wins across state markets.",
-  "Better pursuit selection and earlier identification of competitors and teaming partners."),
+  "Bidder and winner reports by service category and state: who bid, who won, and how outcomes compare across states, including where competitors are moving. For state staff, it shows who has taken on similar work in other states and how those awards compare.",
+  "There's no single view of who bids and who wins across state markets. State staff can use that same view to see how often comparable work is awarded elsewhere.",
+  "Better pursuit selection and earlier identification of competitors and teaming partners. State staff get a cross-state comparison of awards without assembling it by hand."),
  ("insights","Insights","insights",
-  "What's out for bid, contract details, emerging requirements, and price benchmarks for what states pay, in one running page. For state staff this is cost reporting: what other states pay, and how the work was scoped, with the source on the record.",
-  "New requirements and pricing expectations show up in solicitations before they become common knowledge. State staff can read the same records to see how peer states scoped comparable work.",
-  "Pricing confidence for vendors, and a sourced view of cost and scope for state staff."),
+  "What's out for bid, contract details, emerging requirements, and price benchmarks for what states pay, in one running page. For state staff, the price benchmarks are cost reporting: what other states pay and how the contracts are scoped.",
+  "New requirements and pricing expectations show up in solicitations before they become common knowledge. State staff can read those same figures when they scope their own work.",
+  "Pricing confidence and responses that address requirements before competitors notice them. State staff can reuse the cost and scope detail when they adapt an approach from another state."),
  ("library","Proposal reference library","proposal-library",
   "A library of RFPs, amendments, Q&amp;A, and proposals from other states that your team can reference.",
   "Proposal writers need to see how other states framed similar work and how vendors responded.",
@@ -191,9 +195,9 @@ FV = [
   "You can only trust intelligence if you know how fresh it is and where gaps exist.",
   "Confidence in what you're reading, and clear visibility into any gaps."),
  ("filtering","Filter by one or more states",None,
-  "The state filter is a control in the header of every page. Choose one state or any combination, and the whole site follows it. State staff use that comparison set to read peer states side by side instead of the whole country at once.",
-  "Most teams focus on a territory, a pursuit list, or a peer group of states, not all 50 states at once.",
-  "Less noise, and a comparison that matches the states you actually follow."),
+  "The state filter is a control in the header of every page. Choose one state or any combination, and the whole site follows it. State staff can limit the view to the peer states they want to compare.",
+  "Most teams focus on a territory or a pursuit list, not all 50 states at once. A state team usually wants a peer set, not every state at once.",
+  "Less noise, and views that match the markets you actually bid in or the states you want to learn from."),
  ("provenance","Source provenance on everything","provenance",
   "Every item shows its source and when it was collected, so findings can be checked against the original document.",
   "Bid decisions, proposal claims, and contract decisions need evidence that holds up.",
@@ -229,16 +233,11 @@ def fsec(i, x):
         extra = shot(x[6], t) if len(x) > 6 else ""
     body = f'<div class="fv-text"><span class="eb dk">Feature {i+1}</span><h2>{t}</h2><h3>What it does</h3><p>{what}</p><h3>Why it matters</h3><p>{why}</p><h3>Outcome</h3><p class="out">{out}</p></div><div class="fv-media">{media}{extra}</div>'
     return f'<section class="sec fv{" dark" if i%2 else ""}" id="{id_}"><div class="wrap fvg{" rev" if i%2 else ""}">{body}</div></section>'
-STATE_STAFF = sec("For state government staff", cards([
- ("Comparison","Set the states you want to see and compare solicitations, awards, requirements, and how similar work is scoped. Cross-state search and the state filter keep that comparison in one place."),
- ("Trends","Trend views show solicitation activity, awards, and policy changes over time. Staff can see what is spreading across states and what is quiet."),
- ("Cost reporting","Price benchmarks and contract detail show what other states pay and how the work was scoped. Each figure links to the public document it came from, so a number can be checked before anyone relies on it."),
-], "grid3"), "Comparison, trends, and cost reporting are the same cross-state record, read by the people who run programs inside a state.", id_="state-staff")
 P["features.html"] = ("Features | StateWatchPro",
- "What each StateWatchPro feature does and why it matters to consultants, firms, vendors, and state government staff: comparison, trends, cost reporting, email digests, alerts, and customizable dashboards.",
- hero("Features","What each feature does, and why it matters","StateWatchPro brings procurement (bids, awards, bidders, pricing) and policy (legislation, rules, manuals, news) into one place, for teams pursuing new state bids, for those protecting contracts they already hold, and for state government staff comparing other states.",
-  '<nav class="jump" aria-label="Features on this page"><a href="#state-staff">For state government staff</a>' + "".join(f'<a href="#{x[0]}">{x[1]}</a>' for x in FV) + '</nav>')
- + STATE_STAFF + "".join(fsec(i,x) for i,x in enumerate(FV)) + cta(), SOFT)
+ "What each StateWatchPro feature does, why it matters to consultants, firms, vendors, and state staff, and the outcome it supports: comparison, trends, cost reporting, email digests, alerts, and customizable dashboards.",
+ hero("Features","What each feature does, and why it matters","StateWatchPro brings procurement (bids, awards, bidders, pricing) and policy (legislation, rules, manuals, news) into one place, for teams pursuing new state bids, for those protecting contracts they already hold, and for state staff comparing other states.",
+  '<nav class="jump" aria-label="Features on this page">' + "".join(f'<a href="#{x[0]}">{x[1]}</a>' for x in FV) + '</nav>')
+ + "".join(fsec(i,x) for i,x in enumerate(FV)) + cta(), SOFT)
 
 SFAQ=[("How do I get help?","Email hello@statewatchpro.com with a short description of what you need. Include the page and state involved if it’s about data."),
 ("How do I add or change users?","Email us with the names and number of seats you need. Seats depend on your plan: per user, 5-user, 10-user, or Enterprise (up to 30 users)."),

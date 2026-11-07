@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
-"""Build the StateWatchPro static site.
+"""Build the StateWatchPro static site into the repo root (parent of src/).
 
-Default output is the repository root (the parent of this src/ directory),
-which is what GitHub Pages publishes. Set SWP_OUT to write elsewhere.
-Canonical URLs come from SWP_BASE and stay on the github.io base unless
-that variable is set. A CNAME file is written only for a statewatchpro.com build.
+Canonical URLs stay on the github.io base from common.BASE. A CNAME file is
+written only when SWP_BASE is the custom domain, which this build does not set.
 """
 import os, sys, shutil
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from PIL import Image, ImageDraw, ImageFont
 from common import page, BASE
 from pages import P
-REPO = os.path.dirname(HERE)
-OUT = os.environ.get("SWP_OUT", REPO)
+ROOT = os.path.dirname(HERE)
+OUT = os.environ.get("SWP_OUT", ROOT)
 CSS = r"""
 :root{--navy:#0b1f3a;--navy2:#0f2a4f;--navy3:#163a66;--teal:#0e7490;--cyan:#22d3ee;--ink:#0b1426;--mut:#475569;--soft:#f3f8fb;--r:14px}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:#fff}
@@ -65,50 +63,44 @@ img{max-width:100%;height:auto}a{color:var(--teal)}h1,h2,h3{line-height:1.2;colo
 """
 JS = """(()=>{const L=window.SWP_CHECKOUT_LINKS||{};document.querySelectorAll("a[data-plan]").forEach(a=>{const u=(L[a.dataset.plan]||"").trim();if(/^https:\\/\\/(buy|checkout)\\.stripe\\.com\\//.test(u)){a.href=u;a.dataset.checkout="stripe"}})})();
 (()=>{const t=document.querySelector('.tog'),n=document.getElementById('nav');if(t)t.addEventListener('click',()=>{const o=n.classList.toggle('open');t.setAttribute('aria-expanded',o);t.setAttribute('aria-label',o?'Close menu':'Open menu')});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&n.classList.contains('open')){n.classList.remove('open');t.setAttribute('aria-expanded','false');t.focus()}})})();"""
-def _icon_source():
-    env = os.environ.get("SWP_ICON")
-    for p in (env, "/workspace/statewatchpro/statewatchpro-icon.jpg", f"{HERE}/brand/icon-source.jpg"):
-        if p and os.path.exists(p): return p
-    return None
 def assets():
     os.makedirs(f"{OUT}/assets", exist_ok=True); os.makedirs(f"{OUT}/css", exist_ok=True); os.makedirs(f"{OUT}/js", exist_ok=True)
     logo = Image.open(f"{HERE}/logo-crop.png").convert("RGB")
     for n in ["statewatchpro-logo-transparent","statewatchpro-logo-white-transparent"]:
         im = Image.open(f"{HERE}/brand/{n}.png"); h=120; im.resize((round(im.width*h/im.height),h), Image.LANCZOS).save(f"{OUT}/assets/{'logo' if 'white' not in n else 'logo-white'}.png", optimize=True)
     for n in ["statewatchpro-logo.svg","statewatchpro-logo-white.svg"]: shutil.copy(f"{HERE}/brand/{n}", f"{OUT}/assets/{n}")
-    icon_path = _icon_source()
-    pre = f"{HERE}/brand/prebuilt"
-    if icon_path:
-        icon = Image.open(icon_path).convert("RGB")
+    pre = os.path.join(HERE, "prebuilt")
+    icons = ["icon-192.png","icon-512.png","apple-touch-icon.png","favicon.ico"]
+    if all(os.path.exists(os.path.join(pre, n)) for n in icons):
+        for n in icons: shutil.copy(os.path.join(pre, n), os.path.join(OUT, n))
+    else:
+        icon_src = next((p for p in (os.path.join(HERE, "brand", "statewatchpro-icon.jpg"), "/workspace/statewatchpro/statewatchpro-icon.jpg") if os.path.exists(p)), None)
+        if not icon_src: raise SystemExit("missing icon source: add src/prebuilt icons or brand/statewatchpro-icon.jpg")
+        icon = Image.open(icon_src).convert("RGB")
         for n,s in [("icon-192.png",192),("icon-512.png",512),("apple-touch-icon.png",180)]: icon.resize((s,s), Image.LANCZOS).save(f"{OUT}/{n}")
         icon.resize((48,48)).save(f"{OUT}/favicon.ico", sizes=[(16,16),(32,32),(48,48)])
+    og_pre = os.path.join(pre, "og-image.png")
+    if os.path.exists(og_pre):
+        shutil.copy(og_pre, f"{OUT}/assets/og-image.png")
+    else:
         og = Image.new("RGB",(1200,630),(255,255,255)); L = logo.resize((915,300), Image.LANCZOS); og.paste(L,(150,110))
         d = ImageDraw.Draw(og)
         try: f = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 38)
         except Exception: f = ImageFont.load_default()
         d.rectangle((0,560,1200,630), fill=(11,31,58)); t="State government intelligence for bid & capture teams"
         w = d.textlength(t, font=f); d.text(((1200-w)/2,572), t, fill=(34,211,238), font=f); og.save(f"{OUT}/assets/og-image.png", optimize=True)
-    else:
-        for n in ["icon-192.png","icon-512.png","apple-touch-icon.png","favicon.ico"]:
-            shutil.copy(f"{pre}/{n}", f"{OUT}/{n}")
-        shutil.copy(f"{pre}/og-image.png", f"{OUT}/assets/og-image.png")
-def publishing_in_place():
-    out = os.path.abspath(OUT)
-    if out == os.path.abspath(REPO): return True
-    if os.path.exists(os.path.join(out, ".git")): return True
-    if os.path.exists(os.path.join(out, "src", "build.py")): return True
-    return False
+def prepare_out():
+    """Publish in place when OUT is the repo. Never delete src/ or .git."""
+    os.makedirs(OUT, exist_ok=True)
+    out, here = os.path.abspath(OUT), os.path.abspath(HERE)
+    if out == os.path.abspath(ROOT) or here.startswith(out + os.sep) or os.path.isdir(os.path.join(out, ".git")):
+        return
+    shutil.rmtree(out); os.makedirs(OUT)
 def main():
-    if publishing_in_place():
-        os.makedirs(OUT, exist_ok=True)
-    else:
-        if os.path.exists(OUT): shutil.rmtree(OUT)
-        os.makedirs(OUT)
-    assets()
-    os.makedirs(f"{OUT}/assets/screens", exist_ok=True)
-    for name in os.listdir(f"{HERE}/screens"):
-        src, dst = f"{HERE}/screens/{name}", f"{OUT}/assets/screens/{name}"
-        if os.path.isfile(src): shutil.copy(src, dst)
+    prepare_out(); assets()
+    screen_dest = f"{OUT}/assets/screens"
+    if os.path.exists(screen_dest): shutil.rmtree(screen_dest)
+    shutil.copytree(f"{HERE}/screens", screen_dest)
     open(f"{OUT}/css/styles.css","w").write(CSS.strip()); open(f"{OUT}/js/main.js","w").write(JS + "\n" + open(f"{HERE}/chatbot.js").read())
     for f,(t,d,b,*ld) in P.items():
         html = page(f,t,d,b,ld[0] if ld else None, noindex=(f in ("404.html","thank-you.html","checkout-canceled.html")))
@@ -119,11 +111,7 @@ def main():
     open(f"{OUT}/robots.txt","w").write(f"User-agent: *\nAllow: /\nSitemap: {BASE}/sitemap.xml\n")
     open(f"{OUT}/site.webmanifest","w").write('{"name":"StateWatchPro","short_name":"StateWatchPro","icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#0b1f3a","background_color":"#ffffff","display":"standalone"}')
     open(f"{OUT}/.nojekyll","w").write("")
-    cname = f"{OUT}/CNAME"
-    if "statewatchpro.com" in BASE:
-        open(cname,"w").write("statewatchpro.com\n")
-    elif os.path.exists(cname):
-        os.remove(cname)
+    if "statewatchpro.com" in BASE: open(f"{OUT}/CNAME","w").write("statewatchpro.com\n")
     os.makedirs(f"{OUT}/assets/js", exist_ok=True); shutil.copy(f"{HERE}/checkout-config.js", f"{OUT}/assets/js/checkout-config.js")
     shutil.copy(f"{HERE}/README.md", f"{OUT}/README.md")
     print("built", len(P), "pages")

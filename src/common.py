@@ -3,7 +3,7 @@ import json
 SITE = "StateWatchPro"
 import os
 BASE = os.environ.get("SWP_BASE", "https://jonldavis-coder.github.io/statewatchpro-website")  # set SWP_BASE=https://statewatchpro.com for domain build
-V = "20261107b"
+V = "20261107c"
 EMAIL_USER, EMAIL_DOMAIN = "hello", "statewatchpro.com"  # PLACEHOLDER — Jonathan to confirm
 APP = "https://rfp-intelligence-hub-3ht5.onrender.com"
 NAV = [("index.html","Home"),("features.html","Features"),("coverage.html","Coverage"),("use-cases.html","Use cases"),("provenance.html","Data &amp; provenance"),("pricing.html","Pricing"),("faq.html","FAQ"),("support.html","Support")]
@@ -22,7 +22,7 @@ def header(active):
 </nav></header>'''
 
 FOOTER = f'''<footer class="ftr"><div class="wrap fgrid">
-<div><img src="assets/logo-white.png" alt="StateWatchPro" width="189" height="60" loading="lazy"><p>State government intelligence for consultants, consulting firms, vendors, and state government teams, whether you’re pursuing new state bids, protecting contracts you hold, or comparing what other states do.</p>
+<div><img src="assets/logo-white.png" alt="StateWatchPro" width="189" height="60" loading="lazy"><p>State government intelligence for consultants, consulting firms, vendors, and state government teams, whether you’re pursuing new state bids, protecting the contracts you hold, or comparing how other states work.</p>
 <p>Contact: <a href="mailto:{EMAIL_USER}@{EMAIL_DOMAIN}">{EMAIL_USER}@{EMAIL_DOMAIN}</a></p></div>
 <div><h2>Product</h2><ul><li><a href="features.html">Features</a></li><li><a href="coverage.html">Coverage &amp; roadmap</a></li><li><a href="provenance.html">Data &amp; provenance</a></li><li><a href="pricing.html">Pricing</a></li></ul></div>
 <div><h2>Company</h2><ul><li><a href="use-cases.html">Use cases</a></li><li><a href="faq.html">FAQ</a></li><li><a href="contact.html">Contact / demo</a></li><li><a href="support.html">Customer support</a></li></ul></div>

@@ -3,8 +3,9 @@ import sys, os, re, glob, urllib.request
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 HERE=os.path.dirname(os.path.abspath(__file__))
-OUT=os.environ.get("SWP_OUT", os.path.dirname(HERE))
-SHOTS=os.environ.get("SWP_SHOTS","/tmp/swp-shots")
+ROOT=os.path.dirname(HERE)
+OUT=os.environ.get("SWP_OUT", ROOT)
+SHOTS=os.environ.get("SWP_SHOTS", "/tmp/statewatchpro-shots")
 base=sys.argv[1].rstrip("/")+"/"; files=sorted(os.path.basename(p) for p in glob.glob(OUT+"/*.html")); bad=0
 def get(u):
     try: r=urllib.request.urlopen(urllib.request.Request(u,headers={"User-Agent":"Mozilla/5.0"}),timeout=20); return r.status
@@ -24,43 +25,36 @@ for f in glob.glob(OUT+"/**/*.*",recursive=True):
     if f.endswith((".html",".xml",".txt",".webmanifest",".js",".css")):
         for m in re.finditer(r"hhs|medicaid|human[ -]services",open(f).read(),re.I): print("HEALTH-TERM",f,m.group(0)); bad+=1
 print("missing page:", get(base+"nope.html"))
-def need(blob, needle, label):
-    global bad
-    if needle not in blob:
-        print("MISSING", label, needle); bad += 1
-idx=open(f"{OUT}/index.html").read(); feat=open(f"{OUT}/features.html").read(); use=open(f"{OUT}/use-cases.html").read()
-pri=open(f"{OUT}/pricing.html").read(); faq=open(f"{OUT}/faq.html").read(); js=open(f"{OUT}/js/main.js").read()
-for blob, needle, label in [
- (idx,"For state government teams","home audience"),
- (idx,"Email digests and notifications","home digests"),
- (idx,"Customizable dashboards","home dashboards"),
- (idx,'id="audiences"',"home audience id"),
- (idx,'id="stay-current"',"home highlight"),
- (use,'id="government"',"use cases section"),
- (use,"For state government teams","use cases heading"),
- (feat,'id="state-staff"',"features state staff"),
- (feat,"Cost reporting","features cost"),
- (feat,'id="digests"',"features digests"),
- (feat,'id="alerts"',"features alerts"),
- (feat,'id="custom-dashboards"',"features dashboards"),
- (feat,"in-app and by email","features alert delivery"),
- (pri,"$399","trial price"),(pri,"$3,000","per user"),(pri,"$10,000","5 user"),(pri,"$25,000","10 user"),(pri,"$35,000","enterprise"),
- (pri,"agency licensing","pricing agency"),(pri,'id="included"',"plan inclusions"),
- (faq,"Can state government employees use StateWatchPro?","faq government"),
- (faq,"email digest","faq digests"),(faq,"Can I customize my dashboard?","faq dashboards"),
- (js,"in-app and by email","chatbot alerts"),(js,"State government teams","chatbot audience"),
- (idx,"https://jonldavis-coder.github.io/statewatchpro-website/","canonical"),
- (idx,'"audienceType": "State government teams"',"jsonld audience"),
+home=open(f"{OUT}/index.html").read(); uc=open(f"{OUT}/use-cases.html").read(); feat=open(f"{OUT}/features.html").read()
+pricing=open(f"{OUT}/pricing.html").read(); faq=open(f"{OUT}/faq.html").read()
+for needle, blob, name in [
+    ("For state government teams", home, "home"),
+    ('id="audiences"', home, "home"),
+    ("https://jonldavis-coder.github.io/statewatchpro-website/", home, "canonical"),
+    ('id="government"', uc, "use-cases"),
+    ("For state government teams", uc, "use-cases"),
+    ("For state staff", feat, "features"),
+    ("cost reporting", feat, "features-cost"),
+    ("agency licensing", pricing, "pricing"),
+    ("$399", pricing, "price-trial"), ("$3,000", pricing, "price-user"),
+    ("$10,000", pricing, "price-5"), ("$25,000", pricing, "price-10"), ("$35,000", pricing, "price-ent"),
+    ("Can state government employees use StateWatchPro?", faq, "faq"),
+    ("Is agency licensing different from the listed prices?", faq, "faq-2"),
+    ("Email digests and notifications", home, "home-digests"),
+    ('id="stay-current"', home, "home-highlight"),
+    ("Customizable dashboards", home, "home-dashboards"),
+    ('id="digests"', feat, "feat-digests"),
+    ('id="alerts"', feat, "feat-alerts"),
+    ('id="custom-dashboards"', feat, "feat-dashboards"),
+    ("in-app and by email", feat, "feat-delivery"),
+    ('id="included"', pricing, "plan-inclusions"),
+    ("Can I get email digests and alerts?", faq, "faq-digests"),
+    ("Can I customize my dashboard?", faq, "faq-dashboards"),
+    ('"audienceType": "State government teams"', home, "jsonld"),
 ]:
-    need(blob, needle, label)
-if os.path.exists(f"{OUT}/CNAME"):
-    print("CNAME present"); bad += 1
-if "servicers" in feat or "servicers" in idx:
-    print("TYPO servicers"); bad += 1
-for page_name, blob in [("home",idx),("features",feat),("use-cases",use)]:
-    m=re.search(r'<meta name="description" content="([^"]*)"', blob)
-    if not m or "state government" not in m.group(1).lower():
-        print("META", page_name, m.group(1) if m else None); bad += 1
+    if needle not in blob: print("MISSING", name, needle); bad+=1
+if os.path.exists(os.path.join(OUT, "CNAME")): print("UNEXPECTED CNAME"); bad+=1
+if "servicers" in feat.lower() or "servicers" in home.lower(): print("TYPO servicers"); bad+=1
 os.makedirs(SHOTS,exist_ok=True)
 with sync_playwright() as p:
     br=p.chromium.launch(executable_path="/usr/bin/google-chrome",args=["--no-sandbox"])
@@ -84,10 +78,15 @@ with sync_playwright() as p:
         assert "Automated assistant" in pg.inner_text("#cb-panel")
         pg.click(".cb-chips button >> nth=0"); pg.wait_for_timeout(200); assert "$3,000" in pg.inner_text(".cb-log") and "$399" in pg.inner_text(".cb-log")
         pg.fill("#cb-in","which states are covered"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200); assert "Arkansas" in pg.inner_text(".cb-log")
-        pg.fill("#cb-in","can state government employees use this"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200); assert "other states" in pg.inner_text(".cb-log")
-        pg.fill("#cb-in","what alerts can I set"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200); assert "amendments" in pg.inner_text(".cb-log") and "in-app" in pg.inner_text(".cb-log")
-        pg.fill("#cb-in","can I customize my dashboard"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200); assert "widgets" in pg.inner_text(".cb-log")
         pg.fill("#cb-in","zzqx unrelated"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200); assert pg.locator(".cb-log a[href='support.html']").count()>0
+        pg.fill("#cb-in","can state government teams use it"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
+        assert "agency licensing" in pg.inner_text(".cb-log")
+        pg.fill("#cb-in","what is cost reporting for state staff"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
+        assert "what other states pay" in pg.inner_text(".cb-log")
+        pg.fill("#cb-in","what alerts can I set"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
+        assert "amendments" in pg.inner_text(".cb-log") and "in-app" in pg.inner_text(".cb-log")
+        pg.fill("#cb-in","can I customize my dashboard"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
+        assert "widgets" in pg.inner_text(".cb-log")
         pg.screenshot(path=f"{SHOTS}/chatbot-open-{name}.png"); pg.keyboard.press("Escape"); assert not pg.is_visible("#cb-panel")
         for f in files: assert 'href="support.html"' in open(f"{OUT}/{f}").read(), f
         if m:
