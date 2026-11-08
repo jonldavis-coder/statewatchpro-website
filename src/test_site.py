@@ -37,7 +37,7 @@ for needle, blob, name in [
     ("cost reporting", feat, "features-cost"),
     ("agency licensing", pricing, "pricing"),
     ("$129", pricing, "price-trial"), ("$1,999", pricing, "price-user"),
-    ("$10,000", pricing, "price-5"), ("$25,000", pricing, "price-10"), ("$35,000", pricing, "price-ent"),
+    ("$1,699", pricing, "price-5"), ("Custom", pricing, "price-ent"),
     ("Can state government employees use StateWatchPro?", faq, "faq"),
     ("Is agency licensing different from the listed prices?", faq, "faq-2"),
     ("Email digests and notifications", home, "home-digests"),
@@ -84,10 +84,10 @@ for tier in ["tier-1","tier-2","tier-3","tier-4"]:
         print("MISSING annual foia note", tier); bad+=1
 if "1 free FOIA request per year" in psoup.select_one("#trial").get_text(" ", strip=True):
     print("TRIAL includes free FOIA"); bad+=1
-if "$150" not in psoup.select_one("#foia").get_text() or "parent company" not in psoup.select_one("#foia").get_text():
+if "$199" not in psoup.select_one("#foia").get_text() or "parent company" not in psoup.select_one("#foia").get_text():
     print("MISSING foia addon"); bad+=1
 foia=open(f"{OUT}/foia.html").read(); req=open(f"{OUT}/foia-request.html").read()
-for needle in ["48 hours","Approve the draft","Request changes","parent company","$150","not monthly","data-plan=foia","foia-request.html","Tracking and status updates","status updates are provided to you on each FOIA request"]:
+for needle in ["48 hours","Approve the draft","Request changes","parent company","$199","not monthly","data-plan=foia","foia-request.html","Tracking and status updates","status updates are provided to you on each FOIA request"]:
     if needle not in foia: print("MISSING foia page", needle); bad+=1
 for needle in ["id=\"foia-name\"","id=\"foia-org\"","id=\"foia-email\"","id=\"foia-state\"","id=\"foia-agency\"","id=\"foia-records\"","id=\"foia-dates\"","id=\"foia-format\"","id=\"foia-notes\"","id=\"foia-membership\"","value=\"annual\"","value=\"paid\"","48 hours","Request changes","checkout-config.js"]:
     if needle not in req: print("MISSING foia form", needle); bad+=1
@@ -141,7 +141,7 @@ with sync_playwright() as p:
         for f,n in [("","home"),("features.html","features"),("pricing.html","pricing"),("support.html","support")]:
             pg.goto(base+f,wait_until="networkidle"); pg.evaluate("document.querySelectorAll('img[loading=lazy]').forEach(i=>i.loading='eager')"); pg.wait_for_load_state("networkidle"); pg.wait_for_timeout(800); pg.screenshot(path=f"{SHOTS}/{n}-{name}.png",full_page=True)
         pg.goto(base+"pricing.html",wait_until="networkidle")
-        for k in ["trial","per-user","5-user","10-user","enterprise","foia"]: assert pg.get_attribute(f"a[data-plan='{k}']","href").startswith("mailto:"), k
+        for k in ["trial","per-user","enterprise","foia"]: assert pg.get_attribute(f"a[data-plan='{k}']","href").startswith("mailto:"), k
         pg.route("**/checkout-config.js*", lambda r: r.fulfill(content_type="application/javascript", body='window.SWP_CHECKOUT_LINKS={"trial":"https://buy.stripe.com/test_trial","5-user":"https://evil.example/x","foia":"https://buy.stripe.com/test_foia"};'))
         pg.goto(base+"pricing.html",wait_until="networkidle")
         assert pg.get_attribute("a[data-plan='trial']","href")=="https://buy.stripe.com/test_trial"
@@ -157,7 +157,7 @@ with sync_playwright() as p:
         for f in ["thank-you.html","checkout-canceled.html"]: assert "noindex" in open(f"{OUT}/{f}").read() and f not in open(f"{OUT}/sitemap.xml").read()
         pg.goto(base,wait_until="networkidle"); assert pg.is_visible(".cb-btn"); pg.click(".cb-btn"); assert pg.is_visible("#cb-panel")
         assert "Automated assistant" in pg.inner_text("#cb-panel")
-        pg.click(".cb-chips button >> nth=0"); pg.wait_for_timeout(200); assert "$1,999" in pg.inner_text(".cb-log") and "$129" in pg.inner_text(".cb-log") and "$150" in pg.inner_text(".cb-log")
+        pg.click(".cb-chips button >> nth=0"); pg.wait_for_timeout(200); assert "$1,999" in pg.inner_text(".cb-log") and "$129" in pg.inner_text(".cb-log") and "$199" in pg.inner_text(".cb-log")
         pg.fill("#cb-in","which states are covered"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200); assert "Arkansas" in pg.inner_text(".cb-log")
         pg.fill("#cb-in","zzqx unrelated"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200); assert pg.locator(".cb-log a[href='support.html']").count()>0
         pg.fill("#cb-in","can state government teams use it"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
@@ -177,7 +177,7 @@ with sync_playwright() as p:
         assert "model bills" in pg.inner_text(".cb-log")
         pg.fill("#cb-in","how much does a foia request cost"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
         last=pg.locator(".cb-log .cb-msg.bot").last.inner_text()
-        assert "request changes" in last and "48 hours" in last and "not monthly" in last and "$150" in last and "parent company" in last and "status updates" in last
+        assert "request changes" in last and "48 hours" in last and "not monthly" in last and "$199" in last and "parent company" in last and "status updates" in last
         pg.goto(base+"foia-request.html",wait_until="networkidle")
         assert pg.is_hidden("#foia-pay")
         pg.fill("#foia-name","Ada Example"); pg.fill("#foia-org","Example Office"); pg.fill("#foia-email","ada@example.com")
@@ -185,11 +185,11 @@ with sync_playwright() as p:
         pg.fill("#foia-dates","January 2024 to June 2024"); pg.select_option("#foia-format","Electronic"); pg.fill("#foia-notes","Please confirm receipt")
         pg.select_option("#foia-membership","annual")
         mail=pg.get_attribute("#foia-mail","href")
-        assert mail.startswith("mailto:hello@statewatchpro.com") and "Ada%20Example" in mail and "Example%20Office" in mail and "Budget%20memos" in mail and "annual" in mail.lower() and "%24150" not in mail
+        assert mail.startswith("mailto:hello@statewatchpro.com") and "Ada%20Example" in mail and "Example%20Office" in mail and "Budget%20memos" in mail and "annual" in mail.lower() and "%24199" not in mail
         assert pg.is_hidden("#foia-pay")
         pg.select_option("#foia-membership","paid")
         mail=pg.get_attribute("#foia-mail","href")
-        assert "%24150" in mail and "Example%20Agency" in mail and pg.is_hidden("#foia-pay")
+        assert "%24199" in mail and "Example%20Agency" in mail and pg.is_hidden("#foia-pay")
         pg.goto(base+"reports.html",wait_until="networkidle")
         assert "statewatchpro-trends-sample.pdf" in pg.get_attribute("[data-report-preview]","href")
         pg.fill("#req-name","Ada Example"); pg.fill("#req-org","Example Office"); pg.fill("#req-role","Analyst"); pg.select_option("#req-type","Government")
