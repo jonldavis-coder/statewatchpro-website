@@ -37,7 +37,7 @@ for needle, blob, name in [
     ("cost reporting", feat, "features-cost"),
     ("agency licensing", pricing, "pricing"),
     ("$129", pricing, "price-trial"), ("$1,999", pricing, "price-user"),
-    ("$1,699", pricing, "price-5"), ("Custom", pricing, "price-ent"),
+    ("Custom", pricing, "price-ent"),
     ("Can state government employees use StateWatchPro?", faq, "faq"),
     ("Is agency licensing different from the listed prices?", faq, "faq-2"),
     ("Email digests and notifications", home, "home-digests"),
@@ -78,7 +78,7 @@ for needle, name in [
     if needle not in rep: print("MISSING", name, needle); bad+=1
 if "Free preview: latest State Government Trends Insights Report" not in pricing: print("MISSING pricing preview"); bad+=1
 psoup=BeautifulSoup(pricing,"html.parser")
-for tier in ["tier-1","tier-2","tier-3","tier-4"]:
+for tier in ["tier-1"]:
     text=psoup.select_one("#"+tier).get_text(" ", strip=True)
     if "1 free FOIA request per year" not in text or "not monthly" not in text:
         print("MISSING annual foia note", tier); bad+=1
@@ -108,7 +108,7 @@ if "are not included" not in trial_card or "Annual members only" not in trial_ca
     print("MISSING trial reporting exclusion"); bad+=1
 if "Quarterly report and quarterly webinar included." in trial_card:
     print("TRIAL still includes report"); bad+=1
-for tier in ["tier-1","tier-2","tier-3","tier-4"]:
+for tier in ["tier-1"]:
     text=psoup.select_one("#"+tier).get_text(" ", strip=True)
     if "Annual members only" not in text or "quarterly webinar" not in text:
         print("MISSING annual reporting note", tier); bad+=1
@@ -116,6 +116,13 @@ if "every plan that includes the report" in pricing or "including the $399 trial
     print("PRICING still says every plan for report"); bad+=1
 if "$129" not in psoup.select_one("#trial").get_text() or "7 days" not in psoup.select_one("#trial").get_text():
     print("MISSING one-week trial price"); bad+=1
+ent=psoup.select_one("#tier-4").get_text(" ", strip=True)
+if "Everything in Professional, plus" not in ent or "from about $1,499 per user per year" not in ent or "Contact sales" not in ent:
+    print("MISSING enterprise copy"); bad+=1
+if psoup.select_one("#tier-2") or "$1,699" in pricing or "1699" in pricing or ">Team<" in pricing or '"team"' in open(f"{OUT}/assets/js/checkout-config.js").read():
+    print("TEAM tier still present"); bad+=1
+if "$899" not in psoup.select_one("#foia-5pack").get_text():
+    print("MISSING foia 5-pack"); bad+=1
 if "$1,999" not in psoup.select_one("#tier-1").get_text() or "$3,000" in pricing:
     print("MISSING per-user price"); bad+=1
 if '"price": "1999"' not in pricing and '"price":"1999"' not in pricing:
@@ -142,11 +149,11 @@ with sync_playwright() as p:
             pg.goto(base+f,wait_until="networkidle"); pg.evaluate("document.querySelectorAll('img[loading=lazy]').forEach(i=>i.loading='eager')"); pg.wait_for_load_state("networkidle"); pg.wait_for_timeout(800); pg.screenshot(path=f"{SHOTS}/{n}-{name}.png",full_page=True)
         pg.goto(base+"pricing.html",wait_until="networkidle")
         for k in ["trial","per-user","enterprise","foia"]: assert pg.get_attribute(f"a[data-plan='{k}']","href").startswith("mailto:"), k
-        pg.route("**/checkout-config.js*", lambda r: r.fulfill(content_type="application/javascript", body='window.SWP_CHECKOUT_LINKS={"trial":"https://buy.stripe.com/test_trial","5-user":"https://evil.example/x","foia":"https://buy.stripe.com/test_foia"};'))
+        pg.route("**/checkout-config.js*", lambda r: r.fulfill(content_type="application/javascript", body='window.SWP_CHECKOUT_LINKS={"trial":"https://buy.stripe.com/test_trial","per-user":"https://evil.example/x","foia":"https://buy.stripe.com/test_foia"};'))
         pg.goto(base+"pricing.html",wait_until="networkidle")
         assert pg.get_attribute("a[data-plan='trial']","href")=="https://buy.stripe.com/test_trial"
         assert pg.get_attribute("a[data-plan='foia']","href")=="https://buy.stripe.com/test_foia"
-        assert pg.get_attribute("a[data-plan='per-user']","href").startswith("mailto:") and pg.get_attribute("a[data-plan='5-user']","href").startswith("mailto:")
+        assert pg.get_attribute("a[data-plan='per-user']","href").startswith("mailto:")
         pg.goto(base+"foia-request.html",wait_until="networkidle")
         assert pg.is_hidden("#foia-pay")
         pg.select_option("#foia-membership","paid")

@@ -3,7 +3,6 @@
 window.SWP_CHECKOUT_LINKS = {
   "trial": "",       // $129 one-week (7-day) trial (1 user)
   "per-user": "",    // Professional, $1,999 per user per year
-  "team": "",        // Team, $1,699 per user per year (3-9 seats)
   "enterprise": "",  // Enterprise, custom 10+ seats (button reads "Contact sales"; leave empty to keep it as email)
   "foia": ""         // $199 per FOIA request. Empty slot keeps the email fallback. Annual members use the intake form for their 1 free request per year.
 };
