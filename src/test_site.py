@@ -98,6 +98,14 @@ if "request changes" not in open(f"{OUT}/js/main.js").read() or '"foia":' not in
     print("MISSING foia script or checkout slot"); bad+=1
 if "foia.html" not in open(f"{OUT}/sitemap.xml").read() or "foia-request.html" not in open(f"{OUT}/sitemap.xml").read():
     print("MISSING sitemap foia"); bad+=1
+for wf in ["index.html","features.html","pricing.html","reports.html"]:
+    wh=open(f"{OUT}/{wf}").read()
+    if "Register interest" not in wh or "StateWatchPro%20quarterly%20webinar%20interest" not in wh or "trends and insights across state governments" not in wh:
+        print("MISSING webinar", wf); bad+=1
+if "quarterly webinar" not in faq: print("MISSING faq webinar"); bad+=1
+for tier in ["trial","tier-1","tier-2","tier-3","tier-4"]:
+    if "Quarterly report and quarterly webinar included." not in psoup.select_one("#"+tier).get_text(" ", strip=True):
+        print("MISSING plan webinar", tier); bad+=1
 if "statewatchpro-trends-sample.pdf" not in open(f"{OUT}/assets/js/report-config.js").read(): print("MISSING preview url"); bad+=1
 if not os.path.exists(f"{OUT}/assets/reports/statewatchpro-trends-sample.pdf"): print("MISSING pdf"); bad+=1
 if os.path.exists(os.path.join(OUT, "CNAME")): print("UNEXPECTED CNAME"); bad+=1
@@ -143,6 +151,9 @@ with sync_playwright() as p:
         assert "widgets" in pg.inner_text(".cb-log")
         pg.fill("#cb-in","what is the quarterly trends report"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
         assert "Sample Edition" in pg.inner_text(".cb-log")
+        pg.fill("#cb-in","what is the quarterly webinar"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
+        wlast=pg.locator(".cb-log .cb-msg.bot").last.inner_text()
+        assert "trends and insights" in wlast and "$399" in wlast and "reports.html#webinar" in pg.locator(".cb-log .cb-msg.bot").last.inner_html()
         pg.fill("#cb-in","what are peer states"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
         assert "model bills" in pg.inner_text(".cb-log")
         pg.fill("#cb-in","how much does a foia request cost"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
