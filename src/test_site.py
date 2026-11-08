@@ -36,7 +36,7 @@ for needle, blob, name in [
     ("For state staff", feat, "features"),
     ("cost reporting", feat, "features-cost"),
     ("agency licensing", pricing, "pricing"),
-    ("$129", pricing, "price-trial"), ("$3,000", pricing, "price-user"),
+    ("$129", pricing, "price-trial"), ("$1,999", pricing, "price-user"),
     ("$10,000", pricing, "price-5"), ("$25,000", pricing, "price-10"), ("$35,000", pricing, "price-ent"),
     ("Can state government employees use StateWatchPro?", faq, "faq"),
     ("Is agency licensing different from the listed prices?", faq, "faq-2"),
@@ -116,6 +116,10 @@ if "every plan that includes the report" in pricing or "including the $399 trial
     print("PRICING still says every plan for report"); bad+=1
 if "$129" not in psoup.select_one("#trial").get_text() or "7 days" not in psoup.select_one("#trial").get_text():
     print("MISSING one-week trial price"); bad+=1
+if "$1,999" not in psoup.select_one("#tier-1").get_text() or "$3,000" in pricing:
+    print("MISSING per-user price"); bad+=1
+if '"price": "1999"' not in pricing and '"price":"1999"' not in pricing:
+    print("MISSING per-user structured price"); bad+=1
 if "$399" in open(f"{OUT}/reports.html").read() or "30-day" in open(f"{OUT}/reports.html").read():
     print("REPORTS still has old trial"); bad+=1
 if "$129" not in open(f"{OUT}/thank-you.html").read() or "one-week" not in open(f"{OUT}/thank-you.html").read():
@@ -153,7 +157,7 @@ with sync_playwright() as p:
         for f in ["thank-you.html","checkout-canceled.html"]: assert "noindex" in open(f"{OUT}/{f}").read() and f not in open(f"{OUT}/sitemap.xml").read()
         pg.goto(base,wait_until="networkidle"); assert pg.is_visible(".cb-btn"); pg.click(".cb-btn"); assert pg.is_visible("#cb-panel")
         assert "Automated assistant" in pg.inner_text("#cb-panel")
-        pg.click(".cb-chips button >> nth=0"); pg.wait_for_timeout(200); assert "$3,000" in pg.inner_text(".cb-log") and "$129" in pg.inner_text(".cb-log")
+        pg.click(".cb-chips button >> nth=0"); pg.wait_for_timeout(200); assert "$1,999" in pg.inner_text(".cb-log") and "$129" in pg.inner_text(".cb-log") and "$150" in pg.inner_text(".cb-log")
         pg.fill("#cb-in","which states are covered"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200); assert "Arkansas" in pg.inner_text(".cb-log")
         pg.fill("#cb-in","zzqx unrelated"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200); assert pg.locator(".cb-log a[href='support.html']").count()>0
         pg.fill("#cb-in","can state government teams use it"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
