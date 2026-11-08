@@ -36,7 +36,7 @@ for needle, blob, name in [
     ("For state staff", feat, "features"),
     ("cost reporting", feat, "features-cost"),
     ("agency licensing", pricing, "pricing"),
-    ("$399", pricing, "price-trial"), ("$3,000", pricing, "price-user"),
+    ("$129", pricing, "price-trial"), ("$3,000", pricing, "price-user"),
     ("$10,000", pricing, "price-5"), ("$25,000", pricing, "price-10"), ("$35,000", pricing, "price-ent"),
     ("Can state government employees use StateWatchPro?", faq, "faq"),
     ("Is agency licensing different from the listed prices?", faq, "faq-2"),
@@ -103,9 +103,24 @@ for wf in ["index.html","features.html","pricing.html","reports.html"]:
     if "Register interest" not in wh or "StateWatchPro%20quarterly%20webinar%20interest" not in wh or "trends and insights across state governments" not in wh:
         print("MISSING webinar", wf); bad+=1
 if "quarterly webinar" not in faq: print("MISSING faq webinar"); bad+=1
-for tier in ["trial","tier-1","tier-2","tier-3","tier-4"]:
-    if "Quarterly report and quarterly webinar included." not in psoup.select_one("#"+tier).get_text(" ", strip=True):
-        print("MISSING plan webinar", tier); bad+=1
+trial_card=psoup.select_one("#trial").get_text(" ", strip=True)
+if "are not included" not in trial_card or "Annual members only" not in trial_card:
+    print("MISSING trial reporting exclusion"); bad+=1
+if "Quarterly report and quarterly webinar included." in trial_card:
+    print("TRIAL still includes report"); bad+=1
+for tier in ["tier-1","tier-2","tier-3","tier-4"]:
+    text=psoup.select_one("#"+tier).get_text(" ", strip=True)
+    if "Annual members only" not in text or "quarterly webinar" not in text:
+        print("MISSING annual reporting note", tier); bad+=1
+if "every plan that includes the report" in pricing or "including the $399 trial" in pricing or "$399" in pricing or "30-day" in pricing:
+    print("PRICING still says every plan for report"); bad+=1
+if "$129" not in psoup.select_one("#trial").get_text() or "7 days" not in psoup.select_one("#trial").get_text():
+    print("MISSING one-week trial price"); bad+=1
+if "$399" in open(f"{OUT}/reports.html").read() or "30-day" in open(f"{OUT}/reports.html").read():
+    print("REPORTS still has old trial"); bad+=1
+if "$129" not in open(f"{OUT}/thank-you.html").read() or "one-week" not in open(f"{OUT}/thank-you.html").read():
+    print("MISSING thank-you trial"); bad+=1
+if "id=\"annual-only\"" not in pricing: print("MISSING annual-only section"); bad+=1
 if "statewatchpro-trends-sample.pdf" not in open(f"{OUT}/assets/js/report-config.js").read(): print("MISSING preview url"); bad+=1
 if not os.path.exists(f"{OUT}/assets/reports/statewatchpro-trends-sample.pdf"): print("MISSING pdf"); bad+=1
 if os.path.exists(os.path.join(OUT, "CNAME")): print("UNEXPECTED CNAME"); bad+=1
@@ -138,7 +153,7 @@ with sync_playwright() as p:
         for f in ["thank-you.html","checkout-canceled.html"]: assert "noindex" in open(f"{OUT}/{f}").read() and f not in open(f"{OUT}/sitemap.xml").read()
         pg.goto(base,wait_until="networkidle"); assert pg.is_visible(".cb-btn"); pg.click(".cb-btn"); assert pg.is_visible("#cb-panel")
         assert "Automated assistant" in pg.inner_text("#cb-panel")
-        pg.click(".cb-chips button >> nth=0"); pg.wait_for_timeout(200); assert "$3,000" in pg.inner_text(".cb-log") and "$399" in pg.inner_text(".cb-log")
+        pg.click(".cb-chips button >> nth=0"); pg.wait_for_timeout(200); assert "$3,000" in pg.inner_text(".cb-log") and "$129" in pg.inner_text(".cb-log")
         pg.fill("#cb-in","which states are covered"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200); assert "Arkansas" in pg.inner_text(".cb-log")
         pg.fill("#cb-in","zzqx unrelated"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200); assert pg.locator(".cb-log a[href='support.html']").count()>0
         pg.fill("#cb-in","can state government teams use it"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
@@ -153,7 +168,7 @@ with sync_playwright() as p:
         assert "Sample Edition" in pg.inner_text(".cb-log")
         pg.fill("#cb-in","what is the quarterly webinar"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
         wlast=pg.locator(".cb-log .cb-msg.bot").last.inner_text()
-        assert "trends and insights" in wlast and "$399" in wlast and "reports.html#webinar" in pg.locator(".cb-log .cb-msg.bot").last.inner_html()
+        assert "trends and insights" in wlast and "Annual members only" in wlast and "does not include" in wlast and "every plan" not in wlast and "reports.html#webinar" in pg.locator(".cb-log .cb-msg.bot").last.inner_html()
         pg.fill("#cb-in","what are peer states"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
         assert "model bills" in pg.inner_text(".cb-log")
         pg.fill("#cb-in","how much does a foia request cost"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
