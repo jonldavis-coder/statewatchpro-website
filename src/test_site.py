@@ -121,6 +121,10 @@ if "Everything in Professional, plus" not in ent or "from about $1,499 per user 
     print("MISSING enterprise copy"); bad+=1
 if psoup.select_one("#tier-2") or "$1,699" in pricing or "1699" in pricing or ">Team<" in pricing or '"team"' in open(f"{OUT}/assets/js/checkout-config.js").read():
     print("TEAM tier still present"); bad+=1
+PRIV="They are never released to the rest of the platform or shared with any other users."
+for nm,doc in [("foia",open(f"{OUT}/foia.html").read()),("foia-request",open(f"{OUT}/foia-request.html").read()),("pricing",pricing),("faq",faq),("privacy",open(f"{OUT}/privacy.html").read()),("chatbot",open(f"{OUT}/js/main.js").read())]:
+    if PRIV not in doc: print("MISSING foia privacy note", nm); bad+=1
+if PRIV not in psoup.select_one("#foia").get_text() or PRIV not in psoup.select_one("#foia-5pack").get_text(): print("MISSING foia privacy card"); bad+=1
 if "$899" not in psoup.select_one("#foia-5pack").get_text():
     print("MISSING foia 5-pack"); bad+=1
 if "$1,999" not in psoup.select_one("#tier-1").get_text() or "$3,000" in pricing:
