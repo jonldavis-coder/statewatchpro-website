@@ -22,6 +22,7 @@ img{max-width:100%;height:auto}a{color:var(--teal)}h1,h2,h3{line-height:1.2;colo
 .links a{display:block;padding:.45rem .38rem;border-radius:8px;text-decoration:none;color:var(--navy);font-weight:500;font-size:.84rem}.links a:hover,.links a[aria-current]{background:var(--soft);color:var(--teal)}
 .links .btn{color:#fff;margin-left:.3rem}.tog{display:none;background:none;border:0;padding:.6rem;cursor:pointer}.tog span{display:block;width:24px;height:2px;background:var(--navy);margin:5px 0}
 .btn{display:inline-block;padding:.8rem 1.3rem;border-radius:10px;font-weight:600;text-decoration:none;border:2px solid transparent}.btn.sm{padding:.55rem 1rem}
+[hidden]{display:none !important}
 .btn-primary{background:linear-gradient(135deg,#0e7490,#0891b2);color:#fff}.btn-primary:hover{filter:brightness(1.1)}.btn-ghost{border-color:var(--teal);color:var(--teal)}.btn-ghost.light{border-color:var(--cyan);color:#e0faff}
 .hero{background:radial-gradient(1000px 500px at 85% 0%,rgba(34,211,238,.18),transparent),linear-gradient(160deg,var(--navy),var(--navy3));color:#dbe7f3;padding:4.5rem 0}.hero h1{color:#fff}.hero.sub{padding:3.5rem 0}
 .hgrid{display:grid;grid-template-columns:1.05fr 1fr;gap:3rem;align-items:center}.eb{display:inline-block;color:var(--cyan);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.8rem}
@@ -43,6 +44,9 @@ img{max-width:100%;height:auto}a{color:var(--teal)}h1,h2,h3{line-height:1.2;colo
 @media(max-width:980px){.tog{display:block}.links{display:none;position:absolute;top:72px;left:0;right:0;background:#fff;flex-direction:column;align-items:stretch;padding:1rem;border-bottom:1px solid #e2e8f0}.links.open{display:flex}.links a{font-size:1rem;padding:.75rem}.links .btn{margin:.5rem 0 0;text-align:center}
 .hgrid,.grid2,.grid3,.road{grid-template-columns:1fr}.grid4,.steps{grid-template-columns:1fr 1fr}.fgrid{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.grid4,.steps,.fgrid{grid-template-columns:1fr}.hero{padding:3rem 0}.sec{padding:3rem 0}.brand img{height:44px}.mgrid{grid-template-columns:1fr}}
+.steps.five{grid-template-columns:repeat(5,1fr)}
+@media(max-width:1100px){.steps.five{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.steps.five{grid-template-columns:1fr}}
 .price{font-size:2rem;font-weight:800;color:var(--navy);margin:.2rem 0}.ph .btn{margin-top:.6rem}
 .fvg{display:grid;grid-template-columns:1fr 1.15fr;gap:2.5rem;align-items:center}.fvg.rev .fv-text{order:2}.fv,section[id]{scroll-margin-top:88px}.fv h3{font-size:1rem;margin:1rem 0 .2rem;color:var(--teal)}.fv p{margin:0;color:var(--mut)}.fv .out{color:var(--navy);font-weight:600}.eb.dk{color:var(--teal)}
 .shot{margin:0 0 1rem}.shot img{display:block;border-radius:12px;border:1px solid #cbd5e1;box-shadow:0 20px 40px -20px rgba(11,31,58,.45)}.shot figcaption{font-size:.8rem;color:var(--mut);margin-top:.4rem}.hero .shot figcaption{color:#9fb3c8}.hero-shot img{border-color:rgba(255,255,255,.15)}
@@ -75,11 +79,16 @@ img{max-width:100%;height:auto}a{color:var(--teal)}h1,h2,h3{line-height:1.2;colo
 .mock .exlabel{color:#5eead4;font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:0 0 .7rem}
 .req{display:grid;gap:.75rem;max-width:520px}
 .req label{display:grid;gap:.25rem;font-weight:600;color:var(--navy)}
-.req input,.req select{font:inherit;font-weight:400;padding:.65rem .7rem;border:1px solid #cbd5e1;border-radius:8px;width:100%;background:#fff;color:var(--ink)}
+.req input,.req select,.req textarea{font:inherit;font-weight:400;padding:.65rem .7rem;border:1px solid #cbd5e1;border-radius:8px;width:100%;background:#fff;color:var(--ink)}
+.req textarea{min-height:8rem;resize:vertical}
+.addon-grid{display:grid;grid-template-columns:minmax(240px,420px) 1fr;gap:1.2rem;align-items:stretch}
+.addon-grid .ph{display:flex;flex-direction:column}.addon-grid .ph .acts{margin-top:auto}
+@media(max-width:700px){.addon-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 """
 JS = """(()=>{const L=window.SWP_CHECKOUT_LINKS||{};document.querySelectorAll("a[data-plan]").forEach(a=>{const u=(L[a.dataset.plan]||"").trim();if(/^https:\\/\\/(buy|checkout)\\.stripe\\.com\\//.test(u)){a.href=u;a.dataset.checkout="stripe"}})})();
-(()=>{const t=document.querySelector('.tog'),n=document.getElementById('nav');if(t)t.addEventListener('click',()=>{const o=n.classList.toggle('open');t.setAttribute('aria-expanded',o);t.setAttribute('aria-label',o?'Close menu':'Open menu')});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&n.classList.contains('open')){n.classList.remove('open');t.setAttribute('aria-expanded','false');t.focus()}})})();"""
+(()=>{const t=document.querySelector('.tog'),n=document.getElementById('nav');if(t)t.addEventListener('click',()=>{const o=n.classList.toggle('open');t.setAttribute('aria-expanded',o);t.setAttribute('aria-label',o?'Close menu':'Open menu')});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&n.classList.contains('open')){n.classList.remove('open');t.setAttribute('aria-expanded','false');t.focus()}})})();
+(()=>{const form=document.getElementById("foia-request");if(!form)return;const mail=document.getElementById("foia-mail");const pay=document.getElementById("foia-pay");const note=document.getElementById("foia-pay-note");const field=n=>((form.querySelector("[name="+n+"]")||{}).value||"").trim();const sync=()=>{const sel=form.querySelector("[name=membership]");const paid=sel.value==="paid";const label=sel.selectedOptions.length?sel.selectedOptions[0].textContent.trim():"";const stripe=((window.SWP_CHECKOUT_LINKS||{}).foia||"").trim();const stripeOk=/^https:\\/\\/(buy|checkout)\\.stripe\\.com\\//.test(stripe);const lines=["Name: "+field("name"),"Organization: "+field("organization"),"Email: "+field("email"),"State: "+field("state"),"Agency: "+field("agency"),"Records sought: "+field("records"),"Date range: "+field("dates"),"Preferred format: "+field("format"),"Notes: "+field("notes"),"Membership: "+label,"",paid?"This is a paid FOIA request at $150.":"This is the 1 free FOIA request for an annual member. Monthly members are not included."];if(paid&&stripeOk)lines.push("","Payment link (complete after sending this email): "+stripe);if(paid&&!stripeOk)lines.push("","No online payment link is configured. This email is the $150 request.");const subject=paid?"StateWatchPro FOIA request ($150)":"StateWatchPro FOIA request (annual member)";const href="mailto:hello@statewatchpro.com?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(lines.join("\\n"));if(mail)mail.href=href;if(pay){pay.hidden=!(paid&&stripeOk);if(paid&&stripeOk)pay.href=stripe;}if(note)note.hidden=!(paid&&stripeOk);return href;};form.addEventListener("input",sync);form.addEventListener("change",sync);form.addEventListener("submit",e=>{e.preventDefault();window.location.href=sync();});if(pay)pay.addEventListener("click",e=>{if(!form.reportValidity())e.preventDefault();});sync();})();"""
 def assets():
     os.makedirs(f"{OUT}/assets", exist_ok=True); os.makedirs(f"{OUT}/css", exist_ok=True); os.makedirs(f"{OUT}/js", exist_ok=True)
     logo = Image.open(f"{HERE}/logo-crop.png").convert("RGB")
@@ -124,7 +133,7 @@ def main():
         if f=="404.html": html = html.replace("<head>", '<head>\n<base href="'+("/" if "statewatchpro.com" in BASE else "/statewatchpro-website/")+'">',1)
         open(f"{OUT}/{f}","w").write(html)
     urls = [f for f in P if f not in ("404.html","thank-you.html","checkout-canceled.html")]
-    open(f"{OUT}/sitemap.xml","w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>{BASE}/{'' if u=='index.html' else u}</loc><lastmod>2026-11-07</lastmod></url>\n" for u in urls) + "</urlset>\n")
+    open(f"{OUT}/sitemap.xml","w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>{BASE}/{'' if u=='index.html' else u}</loc><lastmod>2026-11-08</lastmod></url>\n" for u in urls) + "</urlset>\n")
     open(f"{OUT}/robots.txt","w").write(f"User-agent: *\nAllow: /\nSitemap: {BASE}/sitemap.xml\n")
     open(f"{OUT}/site.webmanifest","w").write('{"name":"StateWatchPro","short_name":"StateWatchPro","icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#0b1f3a","background_color":"#ffffff","display":"standalone"}')
     open(f"{OUT}/.nojekyll","w").write("")

@@ -77,6 +77,27 @@ for needle, name in [
 ]:
     if needle not in rep: print("MISSING", name, needle); bad+=1
 if "Free preview: latest State Government Trends Insights Report" not in pricing: print("MISSING pricing preview"); bad+=1
+psoup=BeautifulSoup(pricing,"html.parser")
+for tier in ["tier-1","tier-2","tier-3","tier-4"]:
+    text=psoup.select_one("#"+tier).get_text(" ", strip=True)
+    if "1 free FOIA request per year" not in text or "not monthly" not in text:
+        print("MISSING annual foia note", tier); bad+=1
+if "1 free FOIA request per year" in psoup.select_one("#trial").get_text(" ", strip=True):
+    print("TRIAL includes free FOIA"); bad+=1
+if "$150" not in psoup.select_one("#foia").get_text() or "parent company" not in psoup.select_one("#foia").get_text():
+    print("MISSING foia addon"); bad+=1
+foia=open(f"{OUT}/foia.html").read(); req=open(f"{OUT}/foia-request.html").read()
+for needle in ["48 hours","Approve the draft","Request changes","parent company","$150","not monthly","data-plan=foia","foia-request.html","Tracking and status updates","status updates are provided to you on each FOIA request"]:
+    if needle not in foia: print("MISSING foia page", needle); bad+=1
+for needle in ["id=\"foia-name\"","id=\"foia-org\"","id=\"foia-email\"","id=\"foia-state\"","id=\"foia-agency\"","id=\"foia-records\"","id=\"foia-dates\"","id=\"foia-format\"","id=\"foia-notes\"","id=\"foia-membership\"","value=\"annual\"","value=\"paid\"","48 hours","Request changes","checkout-config.js"]:
+    if needle not in req: print("MISSING foia form", needle); bad+=1
+if 'href="foia.html"' not in feat or 'id="foia"' not in feat: print("MISSING features foia link"); bad+=1
+if 'href="foia.html"' not in home: print("MISSING nav foia"); bad+=1
+if "not monthly" not in faq or "48 hours" not in faq or "request changes" not in faq: print("MISSING faq foia"); bad+=1
+if "request changes" not in open(f"{OUT}/js/main.js").read() or '"foia":' not in open(f"{OUT}/assets/js/checkout-config.js").read():
+    print("MISSING foia script or checkout slot"); bad+=1
+if "foia.html" not in open(f"{OUT}/sitemap.xml").read() or "foia-request.html" not in open(f"{OUT}/sitemap.xml").read():
+    print("MISSING sitemap foia"); bad+=1
 if "statewatchpro-trends-sample.pdf" not in open(f"{OUT}/assets/js/report-config.js").read(): print("MISSING preview url"); bad+=1
 if not os.path.exists(f"{OUT}/assets/reports/statewatchpro-trends-sample.pdf"): print("MISSING pdf"); bad+=1
 if os.path.exists(os.path.join(OUT, "CNAME")): print("UNEXPECTED CNAME"); bad+=1
@@ -93,11 +114,18 @@ with sync_playwright() as p:
         for f,n in [("","home"),("features.html","features"),("pricing.html","pricing"),("support.html","support")]:
             pg.goto(base+f,wait_until="networkidle"); pg.evaluate("document.querySelectorAll('img[loading=lazy]').forEach(i=>i.loading='eager')"); pg.wait_for_load_state("networkidle"); pg.wait_for_timeout(800); pg.screenshot(path=f"{SHOTS}/{n}-{name}.png",full_page=True)
         pg.goto(base+"pricing.html",wait_until="networkidle")
-        for k in ["trial","per-user","5-user","10-user","enterprise"]: assert pg.get_attribute(f"a[data-plan='{k}']","href").startswith("mailto:"), k
-        pg.route("**/checkout-config.js*", lambda r: r.fulfill(content_type="application/javascript", body='window.SWP_CHECKOUT_LINKS={"trial":"https://buy.stripe.com/test_trial","5-user":"https://evil.example/x"};'))
+        for k in ["trial","per-user","5-user","10-user","enterprise","foia"]: assert pg.get_attribute(f"a[data-plan='{k}']","href").startswith("mailto:"), k
+        pg.route("**/checkout-config.js*", lambda r: r.fulfill(content_type="application/javascript", body='window.SWP_CHECKOUT_LINKS={"trial":"https://buy.stripe.com/test_trial","5-user":"https://evil.example/x","foia":"https://buy.stripe.com/test_foia"};'))
         pg.goto(base+"pricing.html",wait_until="networkidle")
         assert pg.get_attribute("a[data-plan='trial']","href")=="https://buy.stripe.com/test_trial"
+        assert pg.get_attribute("a[data-plan='foia']","href")=="https://buy.stripe.com/test_foia"
         assert pg.get_attribute("a[data-plan='per-user']","href").startswith("mailto:") and pg.get_attribute("a[data-plan='5-user']","href").startswith("mailto:")
+        pg.goto(base+"foia-request.html",wait_until="networkidle")
+        assert pg.is_hidden("#foia-pay")
+        pg.select_option("#foia-membership","paid")
+        assert pg.is_visible("#foia-pay") and pg.get_attribute("#foia-pay","href")=="https://buy.stripe.com/test_foia"
+        pg.select_option("#foia-membership","annual")
+        assert pg.is_hidden("#foia-pay")
         pg.unroute("**/checkout-config.js*")
         for f in ["thank-you.html","checkout-canceled.html"]: assert "noindex" in open(f"{OUT}/{f}").read() and f not in open(f"{OUT}/sitemap.xml").read()
         pg.goto(base,wait_until="networkidle"); assert pg.is_visible(".cb-btn"); pg.click(".cb-btn"); assert pg.is_visible("#cb-panel")
@@ -117,6 +145,21 @@ with sync_playwright() as p:
         assert "Sample Edition" in pg.inner_text(".cb-log")
         pg.fill("#cb-in","what are peer states"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
         assert "model bills" in pg.inner_text(".cb-log")
+        pg.fill("#cb-in","how much does a foia request cost"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
+        last=pg.locator(".cb-log .cb-msg.bot").last.inner_text()
+        assert "request changes" in last and "48 hours" in last and "not monthly" in last and "$150" in last and "parent company" in last and "status updates" in last
+        pg.goto(base+"foia-request.html",wait_until="networkidle")
+        assert pg.is_hidden("#foia-pay")
+        pg.fill("#foia-name","Ada Example"); pg.fill("#foia-org","Example Office"); pg.fill("#foia-email","ada@example.com")
+        pg.fill("#foia-state","Arkansas"); pg.fill("#foia-agency","Example Agency"); pg.fill("#foia-records","Budget memos")
+        pg.fill("#foia-dates","January 2024 to June 2024"); pg.select_option("#foia-format","Electronic"); pg.fill("#foia-notes","Please confirm receipt")
+        pg.select_option("#foia-membership","annual")
+        mail=pg.get_attribute("#foia-mail","href")
+        assert mail.startswith("mailto:hello@statewatchpro.com") and "Ada%20Example" in mail and "Example%20Office" in mail and "Budget%20memos" in mail and "annual" in mail.lower() and "%24150" not in mail
+        assert pg.is_hidden("#foia-pay")
+        pg.select_option("#foia-membership","paid")
+        mail=pg.get_attribute("#foia-mail","href")
+        assert "%24150" in mail and "Example%20Agency" in mail and pg.is_hidden("#foia-pay")
         pg.goto(base+"reports.html",wait_until="networkidle")
         assert "statewatchpro-trends-sample.pdf" in pg.get_attribute("[data-report-preview]","href")
         pg.fill("#req-name","Ada Example"); pg.fill("#req-org","Example Office"); pg.fill("#req-role","Analyst"); pg.select_option("#req-type","Government")

@@ -5,5 +5,6 @@ window.SWP_CHECKOUT_LINKS = {
   "per-user": "",    // $3,000 per user per year
   "5-user": "",      // $10,000 per year, 5-user bundle
   "10-user": "",     // $25,000 per year, 10-user bundle
-  "enterprise": ""   // $35,000 per year, Enterprise up to 30 users (button reads "Contact sales"; leave empty to keep it as email)
+  "enterprise": "",  // $35,000 per year, Enterprise up to 30 users (button reads "Contact sales"; leave empty to keep it as email)
+  "foia": ""         // $150 per FOIA request. Empty slot keeps the email fallback. Annual members use the intake form for their 1 free request per year.
 };
