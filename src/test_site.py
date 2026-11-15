@@ -30,7 +30,7 @@ pricing=open(f"{OUT}/pricing.html").read(); faq=open(f"{OUT}/faq.html").read()
 for needle, blob, name in [
     ("For state government teams", home, "home"),
     ('id="audiences"', home, "home"),
-    ("https://jonldavis-coder.github.io/statewatchpro-website/", home, "canonical"),
+    ("https://statewatchpro.com/", home, "canonical"),
     ('id="government"', uc, "use-cases"),
     ("For state government teams", uc, "use-cases"),
     ("For state staff", feat, "features"),

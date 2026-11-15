@@ -2,7 +2,7 @@
 import json
 SITE = "StateWatchPro"
 import os
-BASE = os.environ.get("SWP_BASE", "https://jonldavis-coder.github.io/statewatchpro-website")  # set SWP_BASE=https://statewatchpro.com for domain build
+BASE = os.environ.get("SWP_BASE", "https://statewatchpro.com")  # apex canonical; override with SWP_BASE if needed
 V = "20261108f"
 EMAIL_USER, EMAIL_DOMAIN = "hello", "statewatchpro.com"  # PLACEHOLDER — Jonathan to confirm
 APP = "https://rfp-intelligence-hub-3ht5.onrender.com"
