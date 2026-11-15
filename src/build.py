@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Build the StateWatchPro static site into the repo root (parent of src/).
 
-Canonical URLs stay on the github.io base from common.BASE. A CNAME file is
-written only when SWP_BASE is the custom domain, which this build does not set.
+Canonical URLs use the apex domain from common.BASE (https://statewatchpro.com).
+A CNAME file is written when BASE contains statewatchpro.com.
 """
 import os, sys, shutil
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
