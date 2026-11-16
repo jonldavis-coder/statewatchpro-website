@@ -53,7 +53,19 @@ img{max-width:100%;height:auto}a{color:var(--teal)}h1,h2,h3{line-height:1.2;colo
 .ph-slot div{aspect-ratio:16/9;display:grid;place-items:center;border:2px dashed #94a3b8;border-radius:12px;color:var(--mut);background:#fff}
 .jump{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.5rem}.jump a{font-size:.85rem;padding:.35rem .75rem;border:1px solid rgba(34,211,238,.5);border-radius:999px;text-decoration:none;color:#e0faff}
 @media(max-width:980px){.fvg{grid-template-columns:1fr}.fvg.rev .fv-text{order:0}}
-.tiers{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem}.tiers .ph{display:flex;flex-direction:column}.tiers .btn{margin-top:auto}.per{font-size:.85rem;color:var(--mut);margin:0 0 .5rem}@media(max-width:1100px){.tiers{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.tiers{grid-template-columns:1fr}}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;align-items:stretch}.tiers .ph{display:flex;flex-direction:column}.tiers .btn{margin-top:auto}.per{font-size:.85rem;color:var(--mut);margin:0 0 .5rem}@media(max-width:1100px){.tiers{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.tiers{grid-template-columns:1fr}}
+.price-card-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.35rem .6rem;margin-bottom:.35rem}.price-card-top .tag{margin:0}
+.badge.sale{background:#9a3412;color:#fff;letter-spacing:.03em;line-height:1.35;white-space:normal;text-align:left}
+@media(max-width:700px){.price-card-top{flex-direction:column;align-items:flex-start}}
+.offer-now{display:flex;align-items:baseline;flex-wrap:wrap;gap:.35rem .7rem;margin:.15rem 0 .45rem}.offer-now .price{margin:0}
+.price-was{color:#64748b;font-weight:650;text-decoration-thickness:2px}
+.offer-now .price-was{font-size:1.2rem}
+.offer-prices{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.7rem .85rem;margin:.15rem 0 .7rem}
+.offer-prices .price-was{display:block;font-size:.95rem;margin:0 0 .15rem}
+.offer-prices .price{display:flex;align-items:baseline;flex-wrap:wrap;gap:.15rem;margin:0;font-size:clamp(1.35rem,2vw,1.85rem);line-height:1.1}
+.offer-prices .price span{font-size:.82rem;font-weight:650;color:var(--mut)}
+.plan-actions{display:grid;gap:.5rem;margin-top:auto;padding-top:.85rem}.plan-actions .btn{margin-top:0;text-align:center}
+@media(max-width:380px){.offer-prices{grid-template-columns:1fr}}
 .cb-btn{position:fixed;right:20px;bottom:20px;z-index:200;width:60px;height:60px;border-radius:50%;border:0;background:linear-gradient(135deg,#0e7490,#0891b2);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 10px 25px -5px rgba(11,31,58,.5)}
 .cb-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .cb-panel{position:fixed;right:20px;bottom:92px;z-index:200;width:min(380px,calc(100vw - 24px));max-height:min(600px,calc(100vh - 120px));display:flex;flex-direction:column;background:#fff;border:1px solid #cbd5e1;border-radius:16px;box-shadow:0 25px 50px -12px rgba(11,31,58,.45);overflow:hidden}.cb-panel[hidden]{display:none}
@@ -133,7 +145,7 @@ def main():
         if f=="404.html": html = html.replace("<head>", '<head>\n<base href="'+("/" if "statewatchpro.com" in BASE else "/statewatchpro-website/")+'">',1)
         open(f"{OUT}/{f}","w").write(html)
     urls = [f for f in P if f not in ("404.html","thank-you.html","checkout-canceled.html")]
-    open(f"{OUT}/sitemap.xml","w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>{BASE}/{'' if u=='index.html' else u}</loc><lastmod>2026-11-08</lastmod></url>\n" for u in urls) + "</urlset>\n")
+    open(f"{OUT}/sitemap.xml","w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>{BASE}/{'' if u=='index.html' else u}</loc><lastmod>2026-11-16</lastmod></url>\n" for u in urls) + "</urlset>\n")
     open(f"{OUT}/robots.txt","w").write(f"User-agent: *\nAllow: /\nSitemap: {BASE}/sitemap.xml\n")
     open(f"{OUT}/site.webmanifest","w").write('{"name":"StateWatchPro","short_name":"StateWatchPro","icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#0b1f3a","background_color":"#ffffff","display":"standalone"}')
     open(f"{OUT}/.nojekyll","w").write("")

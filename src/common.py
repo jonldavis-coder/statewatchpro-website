@@ -3,7 +3,7 @@ import json
 SITE = "StateWatchPro"
 import os
 BASE = os.environ.get("SWP_BASE", "https://statewatchpro.com")  # apex canonical; override with SWP_BASE if needed
-V = "20261108f"
+V = "20261116a"
 EMAIL_USER, EMAIL_DOMAIN = "hello", "statewatchpro.com"  # PLACEHOLDER — Jonathan to confirm
 APP = "https://rfp-intelligence-hub-3ht5.onrender.com"
 NAV = [("index.html","Home"),("features.html","Features"),("foia.html","FOIA filing"),("reports.html","Reports"),("coverage.html","Coverage"),("use-cases.html","Use cases"),("provenance.html","Data &amp; provenance"),("pricing.html","Pricing"),("faq.html","FAQ"),("support.html","Support")]

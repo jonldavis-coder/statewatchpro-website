@@ -13,7 +13,7 @@ def get(u):
 for f in files+["css/styles.css","js/main.js","robots.txt","sitemap.xml","site.webmanifest","favicon.ico","assets/logo.png","assets/og-image.png","assets/js/checkout-config.js","assets/js/report-config.js","assets/reports/statewatchpro-trends-sample.pdf","assets/statewatchpro-logo.svg"]:
     s=get(base+("" if f=="index.html" else f)); print(s,f)
     if s!=200: bad+=1
-banned=re.compile(r"verasail|scaled ?learning|agile ?&|agileand|\bkids?\b|child|testimonial|lorem|\d+%|password|onrender|hhs|medicaid|human[ -]services|health|sign in",re.I)
+banned=re.compile(r"verasail|scaled ?learning|agile ?&|agileand|\bkids?\b|child|testimonial|lorem|\b(?!50%)\d+%|password|onrender|hhs|medicaid|human[ -]services|health|sign in",re.I)
 for f in files:
     html=open(f"{OUT}/{f}").read()
     for m in banned.finditer(BeautifulSoup(html,"html.parser").get_text(" ")): print("BANNED",f,m.group(0)); bad+=1
@@ -36,7 +36,13 @@ for needle, blob, name in [
     ("For state staff", feat, "features"),
     ("cost reporting", feat, "features-cost"),
     ("agency licensing", pricing, "pricing"),
-    ("$129", pricing, "price-trial"), ("$1,999", pricing, "price-user"),
+    ("$129", pricing, "price-trial-regular"), ("$64", pricing, "price-trial-sale"),
+    ("$1,999", pricing, "price-user-regular"), ("$999", pricing, "price-user-sale"),
+    ("$199/month", pricing, "price-monthly-regular"), ("$99", pricing, "price-monthly-sale"),
+    ("Limited-time offer: 50% off", pricing, "sale-badge"),
+    ("data-plan=per-user-monthly", pricing, "plan-monthly"),
+    ("data-plan=foia-5pack", pricing, "plan-5pack"),
+    ("Paid Monthly", pricing, "btn-monthly"), ("Paid Annual", pricing, "btn-annual"),
     ("Custom", pricing, "price-ent"),
     ("Can state government employees use StateWatchPro?", faq, "faq"),
     ("Is agency licensing different from the listed prices?", faq, "faq-2"),
@@ -114,8 +120,11 @@ for tier in ["tier-1"]:
         print("MISSING annual reporting note", tier); bad+=1
 if "every plan that includes the report" in pricing or "including the $399 trial" in pricing or "$399" in pricing or "30-day" in pricing:
     print("PRICING still says every plan for report"); bad+=1
-if "$129" not in psoup.select_one("#trial").get_text() or "7 days" not in psoup.select_one("#trial").get_text():
+trial_text=psoup.select_one("#trial").get_text(" ", strip=True)
+if "$129" not in trial_text or "$64" not in trial_text or "7 days" not in trial_text or psoup.select_one("#trial s.price-was") is None:
     print("MISSING one-week trial price"); bad+=1
+if "Limited-time offer: 50% off" not in trial_text:
+    print("MISSING trial sale badge"); bad+=1
 ent=psoup.select_one("#tier-4").get_text(" ", strip=True)
 if "Everything in Professional, plus" not in ent or "from about $1,499 per user per year" not in ent or "Contact sales" not in ent:
     print("MISSING enterprise copy"); bad+=1
@@ -127,18 +136,33 @@ for nm,doc in [("foia",open(f"{OUT}/foia.html").read()),("foia-request",open(f"{
 if PRIV not in psoup.select_one("#foia").get_text() or PRIV not in psoup.select_one("#foia-5pack").get_text(): print("MISSING foia privacy card"); bad+=1
 if "$899" not in psoup.select_one("#foia-5pack").get_text():
     print("MISSING foia 5-pack"); bad+=1
-if "$1,999" not in psoup.select_one("#tier-1").get_text() or "$3,000" in pricing:
+pro_text=psoup.select_one("#tier-1").get_text(" ", strip=True)
+if "$1,999" not in pro_text or "$999" not in pro_text or "$199/month" not in pro_text or "$99" not in pro_text or "$3,000" in pricing:
     print("MISSING per-user price"); bad+=1
-if '"price": "1999"' not in pricing and '"price":"1999"' not in pricing:
-    print("MISSING per-user structured price"); bad+=1
+if psoup.select_one("#tier-1 .offer-prices") is None or psoup.select_one("#tier-1 a[data-plan=per-user-monthly]") is None or psoup.select_one("#tier-1 a[data-plan=per-user]") is None:
+    print("MISSING professional offer prices"); bad+=1
+if "not included with Paid Monthly" not in pro_text:
+    print("MISSING monthly exclusion"); bad+=1
+if psoup.select_one("#foia s") or psoup.select_one("#foia-5pack s") or psoup.select_one("#foia-5pack a[data-plan=foia-5pack]") is None:
+    print("FOIA sale markup or missing 5-pack plan"); bad+=1
+for sale_price in ("64","99","999","199","899"):
+    if f'"price": "{sale_price}"' not in pricing:
+        print("MISSING structured price", sale_price); bad+=1
+for old_price in ("129","1999"):
+    if f'"price": "{old_price}"' in pricing:
+        print("OLD structured price still present", old_price); bad+=1
 if "$399" in open(f"{OUT}/reports.html").read() or "30-day" in open(f"{OUT}/reports.html").read():
     print("REPORTS still has old trial"); bad+=1
-if "$129" not in open(f"{OUT}/thank-you.html").read() or "one-week" not in open(f"{OUT}/thank-you.html").read():
-    print("MISSING thank-you trial"); bad+=1
+ty=open(f"{OUT}/thank-you.html").read()
+for needle in ["Thank you for your purchase", "A receipt is coming by email", "account access and next steps", 'href="support.html"', "noindex"]:
+    if needle not in ty: print("MISSING thank-you", needle); bad+=1
+if "one-week" in ty or "$129" in ty or "$64" in ty:
+    print("THANK-YOU quotes a plan"); bad+=1
 if "id=\"annual-only\"" not in pricing: print("MISSING annual-only section"); bad+=1
 if "statewatchpro-trends-sample.pdf" not in open(f"{OUT}/assets/js/report-config.js").read(): print("MISSING preview url"); bad+=1
 if not os.path.exists(f"{OUT}/assets/reports/statewatchpro-trends-sample.pdf"): print("MISSING pdf"); bad+=1
-if os.path.exists(os.path.join(OUT, "CNAME")): print("UNEXPECTED CNAME"); bad+=1
+cname=os.path.join(OUT, "CNAME")
+if not os.path.exists(cname) or open(cname).read().strip()!="statewatchpro.com": print("MISSING CNAME"); bad+=1
 if "servicers" in feat.lower() or "servicers" in home.lower(): print("TYPO servicers"); bad+=1
 os.makedirs(SHOTS,exist_ok=True)
 with sync_playwright() as p:
@@ -152,12 +176,20 @@ with sync_playwright() as p:
         for f,n in [("","home"),("features.html","features"),("pricing.html","pricing"),("support.html","support")]:
             pg.goto(base+f,wait_until="networkidle"); pg.evaluate("document.querySelectorAll('img[loading=lazy]').forEach(i=>i.loading='eager')"); pg.wait_for_load_state("networkidle"); pg.wait_for_timeout(800); pg.screenshot(path=f"{SHOTS}/{n}-{name}.png",full_page=True)
         pg.goto(base+"pricing.html",wait_until="networkidle")
-        for k in ["trial","per-user","enterprise","foia"]: assert pg.get_attribute(f"a[data-plan='{k}']","href").startswith("mailto:"), k
-        pg.route("**/checkout-config.js*", lambda r: r.fulfill(content_type="application/javascript", body='window.SWP_CHECKOUT_LINKS={"trial":"https://buy.stripe.com/test_trial","per-user":"https://evil.example/x","foia":"https://buy.stripe.com/test_foia"};'))
+        live={"trial":"https://buy.stripe.com/4gMaEXa1bcqQcx1ay8f3a0Y","per-user-monthly":"https://buy.stripe.com/00w5kD6OZgH68gL21Cf3a10","per-user":"https://buy.stripe.com/28E4gzehrfD20Oj9u4f3a11","foia":"https://buy.stripe.com/5kQ28r0qBeyYaoT0Xyf3a0Z","foia-5pack":"https://buy.stripe.com/00wdR9gpzbmMeF95dOf3a12"}
+        for k,u in live.items():
+            assert pg.get_attribute(f"a[data-plan='{k}']","href")==u, k
+            assert pg.get_attribute(f"a[data-plan='{k}']","data-checkout")=="stripe", k
+        assert pg.get_attribute("a[data-plan='enterprise']","href").startswith("mailto:")
+        assert pg.get_attribute("a[data-plan='enterprise']","data-checkout") is None
+        pg.route("**/checkout-config.js*", lambda r: r.fulfill(content_type="application/javascript", body='window.SWP_CHECKOUT_LINKS={"trial":"https://buy.stripe.com/test_trial","per-user":"https://evil.example/x","per-user-monthly":"https://buy.stripe.com/test_monthly","foia":"https://buy.stripe.com/test_foia","foia-5pack":"https://checkout.stripe.com/test_5pack"};'))
         pg.goto(base+"pricing.html",wait_until="networkidle")
         assert pg.get_attribute("a[data-plan='trial']","href")=="https://buy.stripe.com/test_trial"
+        assert pg.get_attribute("a[data-plan='per-user-monthly']","href")=="https://buy.stripe.com/test_monthly"
         assert pg.get_attribute("a[data-plan='foia']","href")=="https://buy.stripe.com/test_foia"
+        assert pg.get_attribute("a[data-plan='foia-5pack']","href")=="https://checkout.stripe.com/test_5pack"
         assert pg.get_attribute("a[data-plan='per-user']","href").startswith("mailto:")
+        assert pg.get_attribute("a[data-plan='enterprise']","href").startswith("mailto:")
         pg.goto(base+"foia-request.html",wait_until="networkidle")
         assert pg.is_hidden("#foia-pay")
         pg.select_option("#foia-membership","paid")
@@ -168,7 +200,10 @@ with sync_playwright() as p:
         for f in ["thank-you.html","checkout-canceled.html"]: assert "noindex" in open(f"{OUT}/{f}").read() and f not in open(f"{OUT}/sitemap.xml").read()
         pg.goto(base,wait_until="networkidle"); assert pg.is_visible(".cb-btn"); pg.click(".cb-btn"); assert pg.is_visible("#cb-panel")
         assert "Automated assistant" in pg.inner_text("#cb-panel")
-        pg.click(".cb-chips button >> nth=0"); pg.wait_for_timeout(200); assert "$1,999" in pg.inner_text(".cb-log") and "$129" in pg.inner_text(".cb-log") and "$199" in pg.inner_text(".cb-log")
+        pg.click(".cb-chips button >> nth=0"); pg.wait_for_timeout(200)
+        clog=pg.inner_text(".cb-log")
+        for needle in ["$64","$129","$99","$199","$999","$1,999","$899","not monthly"]:
+            assert needle in clog, needle
         pg.fill("#cb-in","which states are covered"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200); assert "Arkansas" in pg.inner_text(".cb-log")
         pg.fill("#cb-in","zzqx unrelated"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200); assert pg.locator(".cb-log a[href='support.html']").count()>0
         pg.fill("#cb-in","can state government teams use it"); pg.press("#cb-in","Enter"); pg.wait_for_timeout(200)
@@ -200,7 +235,8 @@ with sync_playwright() as p:
         assert pg.is_hidden("#foia-pay")
         pg.select_option("#foia-membership","paid")
         mail=pg.get_attribute("#foia-mail","href")
-        assert "%24199" in mail and "Example%20Agency" in mail and pg.is_hidden("#foia-pay")
+        assert "%24199" in mail and "Example%20Agency" in mail and pg.is_visible("#foia-pay")
+        assert pg.get_attribute("#foia-pay","href")=="https://buy.stripe.com/5kQ28r0qBeyYaoT0Xyf3a0Z"
         pg.goto(base+"reports.html",wait_until="networkidle")
         assert "statewatchpro-trends-sample.pdf" in pg.get_attribute("[data-report-preview]","href")
         pg.fill("#req-name","Ada Example"); pg.fill("#req-org","Example Office"); pg.fill("#req-role","Analyst"); pg.select_option("#req-type","Government")
