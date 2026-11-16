@@ -34,11 +34,11 @@ def header(active):
     items=[]
     for h,l in NAV:
         cur=' aria-current="page"' if h==active else ""
-        items.append(f'<li><a href="{h}"{cur}>{l}</a></li>')
+        items.append(f'<li><a href="{"/" if h=="index.html" else h}"{cur}>{l}</a></li>')
     li="".join(items)
     return f'''<a class="skip" href="#main">Skip to main content</a>
 <header class="hdr"><nav class="wrap nav" aria-label="Primary">
-<a class="brand" href="index.html">{brand_img()}</a>
+<a class="brand" href="/">{brand_img()}</a>
 <button class="tog" type="button" aria-controls="nav" aria-expanded="false" aria-label="Open menu"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
 <ul id="nav" class="links">{li}<li>{DEMO("btn btn-primary sm")}</li></ul>
 </nav></header>'''
