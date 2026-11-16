@@ -1,0 +1,71 @@
+# Member app only. The marketing site stays on GitHub Pages from the repo root.
+# This Blueprint does not publish or replace statewatchpro.com.
+
+databases:
+  - name: statewatchpro-db
+    plan: basic-256mb
+    region: oregon
+    postgresMajorVersion: "16"
+
+services:
+  - type: web
+    name: statewatchpro-app
+    runtime: node
+    plan: starter
+    region: oregon
+    rootDir: app
+    buildCommand: npm ci
+    preDeployCommand: npm run migrate
+    startCommand: npm start
+    healthCheckPath: /healthz
+    buildFilter:
+      paths:
+        - app/**
+        - render.yaml
+    domains:
+      - app.statewatchpro.com
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: statewatchpro-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: APP_URL
+        value: https://app.statewatchpro.com
+      - key: MARKETING_URL
+        value: https://statewatchpro.com
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_PRICE_TRIAL
+        value: price_1UcE1fFhnOoFBQrwd8cVFFG9
+      - key: STRIPE_PRICE_TRIAL_REGULAR
+        value: price_1UcE1fFhnOoFBQrwOqISK7d5
+      - key: STRIPE_PRICE_MONTHLY
+        value: price_1UcE1gFhnOoFBQrw2EFjpFps
+      - key: STRIPE_PRICE_MONTHLY_REGULAR
+        value: price_1UcE1gFhnOoFBQrwrhZ3SrfE
+      - key: STRIPE_PRICE_ANNUAL
+        value: price_1UcE1hFhnOoFBQrwdPReAMdZ
+      - key: STRIPE_PRICE_ANNUAL_REGULAR
+        value: price_1UcE1iFhnOoFBQrw9OsvEnuh
+      - key: STRIPE_PRICE_FOIA
+        value: price_1UcE1iFhnOoFBQrwKX1zsL4K
+      - key: STRIPE_PRICE_FOIA_5PACK
+        value: price_1UcE1jFhnOoFBQrwgRAVQyAN
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
