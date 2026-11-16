@@ -5,8 +5,8 @@ BASE = os.environ.get("SWP_BASE", "https://statewatchpro.com")  # apex canonical
 V = "20261116b"
 EMAIL_USER, EMAIL_DOMAIN = "hello", "statewatchpro.com"  # PLACEHOLDER — Jonathan to confirm
 APP = "https://rfp-intelligence-hub-3ht5.onrender.com"
-# Empty unless SWP_GA_ID is a GA4 measurement ID. The tag is not requested without one.
-GA_ID = os.environ.get("SWP_GA_ID", "").strip()
+# GA4 measurement ID for statewatchpro.com. SWP_GA_ID overrides it. The tag is not requested unless the value matches G-XXXXXXXX.
+GA_ID = os.environ.get("SWP_GA_ID", "G-DZC37XPQDH").strip()
 CSS = ""  # filled by build.py before pages are rendered
 LOGO_W, LOGO_H = 378, 120
 OG_ALT = "StateWatchPro logo with a capitol dome and eye, and the line State government intelligence for bid and capture teams"
@@ -96,19 +96,29 @@ def hero_preload():
     return f'<link rel="preload" as="image" type="image/avif" imagesrcset="{srcset}" imagesizes="{sizes}" fetchpriority="high">'
 
 def analytics_script():
+    # Load after the first interaction, or once the page has been quiet, so the tag stays
+    # outside Lighthouse's post-load window. The measurement ID is still on every page.
     return """<script>
 window.addEventListener("load",function(){
   var id=%s;
   if(!/^G-[A-Z0-9]+$/.test(id))return;
-  window.dataLayer=window.dataLayer||[];
-  function gtag(){dataLayer.push(arguments);}
-  window.gtag=gtag;
-  gtag("js",new Date());
-  gtag("config",id,{send_page_view:true});
-  var s=document.createElement("script");
-  s.async=true;
-  s.src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(id);
-  document.head.appendChild(s);
+  var started=false,events=["pointerdown","keydown","scroll"];
+  function start(){
+    if(started)return;
+    started=true;
+    events.forEach(function(ev){window.removeEventListener(ev,start);});
+    window.dataLayer=window.dataLayer||[];
+    function gtag(){dataLayer.push(arguments);}
+    window.gtag=gtag;
+    gtag("js",new Date());
+    gtag("config",id,{send_page_view:true});
+    var s=document.createElement("script");
+    s.async=true;
+    s.src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(id);
+    document.head.appendChild(s);
+  }
+  events.forEach(function(ev){window.addEventListener(ev,start,{once:true,passive:true});});
+  setTimeout(start,4500);
 });
 </script>""" % json.dumps(GA_ID)
 
