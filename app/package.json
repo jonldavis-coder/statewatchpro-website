@@ -1,0 +1,21 @@
+{
+  "name": "statewatchpro-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "migrate": "node src/migrate.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "express": "^4.21.2",
+    "helmet": "^8.1.0",
+    "nodemailer": "^10.6.0",
+    "pg": "^8.16.3"
+  }
+}
